@@ -39,7 +39,7 @@ public class AccountDAO {
     }
 
     public void lockAccounts(long id1, long id2) throws Exception {
-        String sql = "select from accounts where id in (?,?) for update";
+        String sql = "select * from accounts where id in (?,?) for update";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setLong(1, id1);
         ps.setLong(2, id2);

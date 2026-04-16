@@ -6,20 +6,23 @@ drop table if exists transactions;
 create table accounts (
     id BIGINT auto_increment primary key,
     name varchar(100),
-    balance BIGINT
-    role VARCHAR(10)
+    balance BIGINT DEFAULT 1000000 NOT NULL,
+    role VARCHAR(10) NOT NULL
 );
 
 create table transactions (
     id BIGINT auto_increment primary key,
-    senderId BIGINT,
-    receiverId BIGINT,
-    amount BIGINT,
+    senderId BIGINT NOT NULL,
+    receiverId BIGINT NOT NULL,
+    amount BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-insert into accounts (name, balance) values
-    ('user1', 10000),
-    ('user2', 20000),
-    ('user3', 40000),
-    ('admin', 0);
+CREATE INDEX idx_senderId ON transactions(senderId);
+CREATE INDEX idx_receiverId ON transactions(receiverId);
+
+insert into accounts (name, role) values
+    ('user1', 'user'),
+    ('user2', 'user'),
+    ('user3', 'user'),
+    ('admin', 'admin');

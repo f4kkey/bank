@@ -67,23 +67,23 @@ public class TransactionService {
 
     public static void main(String[] args) {
         TransactionService service = new TransactionService();
+        boolean success = service.transfer(1, 2, 1000000);
+        if (success) {
+            System.out.println("Transfer successful");
+            try {
+                AccountDAO accountDAO = new AccountDAO(DBconnnection.getConnection());
+                Account sender = accountDAO.getById(1);
+                Account receiver = accountDAO.getById(2);
+                System.out.println(sender.getName() + " has balance: " +
+                        sender.getBalance());
+                System.out.println(receiver.getName() + " has balance: " +
+                        receiver.getBalance());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Transfer failed");
+        }
         System.out.println(service.getTransactionsHistoryList());
-        // boolean success = service.transfer(1, 2, 1000000);
-        // if (success) {
-        // System.out.println("Transfer successful");
-        // try {
-        // AccountDAO accountDAO = new AccountDAO(DBconnnection.getConnection());
-        // Account sender = accountDAO.getById(1);
-        // Account receiver = accountDAO.getById(2);
-        // System.out.println(sender.getName() + " has balance: " +
-        // sender.getBalance());
-        // System.out.println(receiver.getName() + " has balance: " +
-        // receiver.getBalance());
-        // } catch (Exception e) {
-        // e.printStackTrace();
-        // }
-        // } else {
-        // System.out.println("Transfer failed");
-        // }
     }
 }
