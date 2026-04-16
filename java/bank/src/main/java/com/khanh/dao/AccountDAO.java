@@ -24,7 +24,8 @@ public class AccountDAO {
             return new Account(
                     rs.getLong("id"),
                     rs.getString("name"),
-                    rs.getLong("balance"));
+                    rs.getLong("balance"),
+                    rs.getString("role"));
         }
         return null;
     }
@@ -35,6 +36,14 @@ public class AccountDAO {
         ps.setLong(1, newBalance);
         ps.setLong(2, id);
         ps.executeUpdate();
+    }
+
+    public void lockAccounts(long id1, long id2) throws Exception {
+        String sql = "select from accounts where id in (?,?) for update";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setLong(1, id1);
+        ps.setLong(2, id2);
+        ps.executeQuery();
     }
 
     public static void main(String[] args) {

@@ -7,6 +7,7 @@ create table accounts (
     id BIGINT auto_increment primary key,
     name varchar(100),
     balance BIGINT
+    role VARCHAR(10)
 );
 
 create table transactions (
