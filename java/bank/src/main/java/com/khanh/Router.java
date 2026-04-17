@@ -2,6 +2,8 @@ package com.khanh;
 
 import org.json.JSONObject;
 
+import com.khanh.handler.TransactionHandler;
+
 public class Router {
     public String route(String request) {
         try {
@@ -10,18 +12,15 @@ public class Router {
             String method = req.getString("method");
             String path = req.getString("path");
 
-            JSONObject body = req.optJSONObject("body");
-            JSONObject query = req.optJSONObject("query");
-
             System.out.println(request);
 
             if (method.equals("GET") && path.equals("/test"))
                 return new JSONObject().put("status", "SUCCESS").put("message", "API call").toString();
+            if (method.equals("POST") && path.equals("/transfer"))
+                return new TransactionHandler().handle(req);
 
             return new JSONObject().put("status", "ERROR").put("message", "Unknown API").toString();
-        } catch (
-
-        Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return new JSONObject().put("status", "ERROR").put("message", "Invalid request").toString();
         }

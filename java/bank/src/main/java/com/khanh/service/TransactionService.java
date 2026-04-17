@@ -12,7 +12,7 @@ import com.khanh.util.DBconnnection;
 import com.khanh.model.*;
 
 public class TransactionService {
-    public boolean transfer(long senderId, long receiverId, long amount) {
+    public boolean transfer(long senderId, long receiverId, long amount, long billId) {
         try {
             Connection conn = DBconnnection.getConnection();
             conn.setAutoCommit(false); // rollback
@@ -52,6 +52,10 @@ public class TransactionService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean transfer(long senderId, long receiverId, long amount) {
+        return transfer(senderId, receiverId, amount, 0);
     }
 
     public List<Transaction> getTransactionsHistoryList() {

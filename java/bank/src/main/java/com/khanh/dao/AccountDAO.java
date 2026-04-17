@@ -50,7 +50,7 @@ public class AccountDAO {
         try {
             Connection conn = DBconnnection.getConnection();
             AccountDAO accountDAO = new AccountDAO(conn);
-            Account account = accountDAO.getById(4);
+            Account account = accountDAO.getById(1);
             System.out.println(account.getName() + " has balance: " + account.getBalance());
         } catch (Exception e) {
             e.printStackTrace();
