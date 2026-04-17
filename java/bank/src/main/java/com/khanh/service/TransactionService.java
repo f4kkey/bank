@@ -55,7 +55,7 @@ public class TransactionService {
     }
 
     public boolean transfer(long senderId, long receiverId, long amount) {
-        return transfer(senderId, receiverId, amount, 0);
+        return transfer(senderId, receiverId, amount, -1);
     }
 
     public List<Transaction> getTransactionsList() {
@@ -63,6 +63,17 @@ public class TransactionService {
             Connection conn = DBconnnection.getConnection();
             TransactionDAO transactionDAO = new TransactionDAO(conn);
             return transactionDAO.getTransactionsList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Transaction> getPersonalTransactionsList(long userId, long transactionId, long billId) {
+        try {
+            Connection conn = DBconnnection.getConnection();
+            TransactionDAO transactionDAO = new TransactionDAO(conn);
+            return transactionDAO.getPersonalTransactionsList(userId, transactionId, billId);
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();

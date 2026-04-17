@@ -19,9 +19,10 @@ public class Router {
                 return new JSONObject().put("status", "SUCCESS").put("message", "API call").toString();
             if (method.equals("POST") && path.equals("/transfer"))
                 return new TransactionController().transfer(req);
-            if (method.equals("GET") && path.equals("/user/balance")) {
+            if (method.equals("GET") && path.equals("/user/balance"))
                 return new AccountController().getBalance(req);
-            }
+            if (method.equals("GET") && path.equals("/user/transactions"))
+                return new TransactionController().getPersonalTransactionsList(req);
 
             return new JSONObject().put("status", "ERROR").put("message", "Unknown API").toString();
         } catch (Exception e) {

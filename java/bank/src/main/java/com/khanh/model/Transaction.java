@@ -4,13 +4,15 @@ import java.sql.Timestamp;
 
 public class Transaction {
     private long id;
+    private long billId;
     private long senderId;
     private long receiverId;
     private long amount;
     private Timestamp createdAt;
 
-    public Transaction(long id, long senderId, long receiverId, long amount, Timestamp createdAt) {
+    public Transaction(long id, long billId, long senderId, long receiverId, long amount, Timestamp createdAt) {
         this.id = id;
+        this.billId = billId;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.amount = amount;
@@ -23,6 +25,14 @@ public class Transaction {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public long getBillId() {
+        return billId;
+    }
+
+    public void setBillId(long billId) {
+        this.billId = billId;
     }
 
     public long getSenderId() {

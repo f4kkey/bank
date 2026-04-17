@@ -25,5 +25,6 @@ $request = [
     "body" => $body,
     "headers" => $headers
 ];
+error_log($uri);
 
 echo call_java($request);

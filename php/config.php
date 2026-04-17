@@ -16,5 +16,6 @@ function call_java($data)
     fwrite($socket, json_encode($data) . "\n");
     $response = fgets($socket);
     fclose($socket);
+
     return $response;
 }

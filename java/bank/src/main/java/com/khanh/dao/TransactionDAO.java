@@ -33,23 +33,40 @@ public class TransactionDAO {
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             res.add(
-                    new Transaction(rs.getLong("id"), rs.getLong("senderId"), rs.getLong("receiverId"),
+                    new Transaction(rs.getLong("id"), rs.getLong("billId"), rs.getLong("senderId"),
+                            rs.getLong("receiverId"),
                             rs.getLong("amount"), rs.getTimestamp("created_at")));
         }
         return res;
     }
 
-    public List<Transaction> getPersonalTransactionsList(long id) throws Exception {
+    public List<Transaction> getPersonalTransactionsList(long userId, long transactionId, long billId)
+            throws Exception {
         List<Transaction> res = new ArrayList<>();
 
-        String sql = "select * from transactions where senderId = ? OR receiverId = ? ORDER BY created_at desc";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setLong(1, id);
-        ps.setLong(2, id);
+        StringBuilder sql = new StringBuilder("SELECT * FROM transactions WHERE (senderId = ? OR receiverId = ?)");
+        List<Object> params = new ArrayList<>();
+        params.add(userId);
+        params.add(userId);
+        if (transactionId != -1) {
+            sql.append(" AND id = ?");
+            params.add(transactionId);
+        }
+        if (billId != -1) {
+            sql.append(" AND billId = ?");
+            params.add(billId);
+        }
+        sql.append(" ORDER BY created_at DESC");
+
+        PreparedStatement ps = conn.prepareStatement(sql.toString());
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             res.add(
-                    new Transaction(rs.getLong("id"), rs.getLong("senderId"), rs.getLong("receiverId"),
+                    new Transaction(rs.getLong("id"), rs.getLong("billId"), rs.getLong("senderId"),
+                            rs.getLong("receiverId"),
                             rs.getLong("amount"), rs.getTimestamp("created_at")));
         }
         return res;
@@ -58,7 +75,7 @@ public class TransactionDAO {
     public static void main(String[] arg) throws Exception {
         Connection conn = DBconnnection.getConnection();
         TransactionDAO transactionDAO = new TransactionDAO(conn);
-        System.out.println(transactionDAO.getPersonalTransactionsList(2));
+        System.out.println(transactionDAO.getPersonalTransactionsList(2, -1, -1));
 
     }
 }
