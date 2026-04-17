@@ -25,7 +25,7 @@ public class TransactionDAO {
         ps.executeUpdate();
     }
 
-    public List<Transaction> getTransactionsHistoryList() throws Exception {
+    public List<Transaction> getTransactionsList() throws Exception {
         List<Transaction> res = new ArrayList<>();
 
         String sql = "select * from transactions order by created_at desc";
@@ -39,7 +39,7 @@ public class TransactionDAO {
         return res;
     }
 
-    public List<Transaction> getPersonalTransactionsHistoryList(long id) throws Exception {
+    public List<Transaction> getPersonalTransactionsList(long id) throws Exception {
         List<Transaction> res = new ArrayList<>();
 
         String sql = "select * from transactions where senderId = ? OR receiverId = ? ORDER BY created_at desc";
@@ -58,7 +58,7 @@ public class TransactionDAO {
     public static void main(String[] arg) throws Exception {
         Connection conn = DBconnnection.getConnection();
         TransactionDAO transactionDAO = new TransactionDAO(conn);
-        System.out.println(transactionDAO.getPersonalTransactionsHistoryList(2));
+        System.out.println(transactionDAO.getPersonalTransactionsList(2));
 
     }
 }

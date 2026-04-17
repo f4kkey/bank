@@ -2,7 +2,8 @@ package com.khanh;
 
 import org.json.JSONObject;
 
-import com.khanh.handler.TransactionHandler;
+import com.khanh.controller.AccountController;
+import com.khanh.controller.TransactionController;
 
 public class Router {
     public String route(String request) {
@@ -17,7 +18,10 @@ public class Router {
             if (method.equals("GET") && path.equals("/test"))
                 return new JSONObject().put("status", "SUCCESS").put("message", "API call").toString();
             if (method.equals("POST") && path.equals("/transfer"))
-                return new TransactionHandler().handle(req);
+                return new TransactionController().transfer(req);
+            if (method.equals("GET") && path.equals("/user/balance")) {
+                return new AccountController().getBalance(req);
+            }
 
             return new JSONObject().put("status", "ERROR").put("message", "Unknown API").toString();
         } catch (Exception e) {

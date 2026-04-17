@@ -58,11 +58,11 @@ public class TransactionService {
         return transfer(senderId, receiverId, amount, 0);
     }
 
-    public List<Transaction> getTransactionsHistoryList() {
+    public List<Transaction> getTransactionsList() {
         try {
             Connection conn = DBconnnection.getConnection();
             TransactionDAO transactionDAO = new TransactionDAO(conn);
-            return transactionDAO.getTransactionsHistoryList();
+            return transactionDAO.getTransactionsList();
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -88,6 +88,6 @@ public class TransactionService {
         } else {
             System.out.println("Transfer failed");
         }
-        System.out.println(service.getTransactionsHistoryList());
+        System.out.println(service.getTransactionsList());
     }
 }
