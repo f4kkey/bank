@@ -67,12 +67,12 @@ public class TransactionService {
 
     public static void main(String[] args) {
         TransactionService service = new TransactionService();
-        boolean success = service.transfer(1, 2, 1000000);
+        boolean success = service.transfer(2, 3, 1500000);
         if (success) {
             System.out.println("Transfer successful");
             try {
                 AccountDAO accountDAO = new AccountDAO(DBconnnection.getConnection());
-                Account sender = accountDAO.getById(1);
+                Account sender = accountDAO.getById(4);
                 Account receiver = accountDAO.getById(2);
                 System.out.println(sender.getName() + " has balance: " +
                         sender.getBalance());

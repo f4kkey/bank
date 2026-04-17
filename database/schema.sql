@@ -1,6 +1,7 @@
 use bank;
 
 drop table if exists accounts;
+
 drop table if exists transactions;
 
 create table accounts (
@@ -12,17 +13,20 @@ create table accounts (
 
 create table transactions (
     id BIGINT auto_increment primary key,
+    billId BIGINT,
     senderId BIGINT NOT NULL,
     receiverId BIGINT NOT NULL,
     amount BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_senderId ON transactions(senderId);
-CREATE INDEX idx_receiverId ON transactions(receiverId);
+CREATE INDEX idx_senderId ON transactions (senderId);
 
-insert into accounts (name, role) values
-    ('user1', 'user'),
+CREATE INDEX idx_receiverId ON transactions (receiverId);
+
+insert into
+    accounts (name, role)
+values ('user1', 'user'),
     ('user2', 'user'),
     ('user3', 'user'),
     ('admin', 'admin');
