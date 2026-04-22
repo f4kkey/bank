@@ -16,7 +16,7 @@ public class TransactionController {
             long senderId = body.getLong("senderId");
             long receiverId = body.getLong("receiverId");
             long amount = body.getLong("amount");
-            long billId = body.optLong("billId", 0);
+            long billId = body.optLong("billId", -1);
 
             boolean res = new TransactionService().transfer(senderId, receiverId, amount, billId);
             return new JSONObject().put("status", res ? "SUCCESS" : "FAIL").toString();

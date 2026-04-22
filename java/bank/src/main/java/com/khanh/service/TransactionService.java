@@ -9,12 +9,22 @@ import org.checkerframework.checker.units.qual.A;
 import com.khanh.dao.AccountDAO;
 import com.khanh.dao.TransactionDAO;
 import com.khanh.util.DBconnnection;
+import com.khanh.util.Redis;
 import com.khanh.model.*;
 
 public class TransactionService {
     Connection conn = null;
 
     public boolean transfer(long senderId, long receiverId, long amount, long billId) {
+        String redisKey = "bill:" + billId;
+        if (billId != -1) {
+            boolean locked = Redis.lock(redisKey, 300);
+            if (!locked) {
+                System.out.println("Duplicate billId detected");
+                return true;
+            }
+        }
+
         try {
             conn = DBconnnection.getConnection();
             conn.setAutoCommit(false); // rollback
@@ -59,6 +69,9 @@ public class TransactionService {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
+            }
+            if (billId != -1) {
+                Redis.delete("bill:" + billId);
             }
             return false;
         } finally {
