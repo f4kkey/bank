@@ -23,7 +23,7 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
-        ServerSocket server = new ServerSocket(9000);
+        ServerSocket server = new ServerSocket(12345);
         System.out.println("java bank server running at 9000");
 
         while (true) {

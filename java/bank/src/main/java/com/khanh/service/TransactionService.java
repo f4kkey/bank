@@ -32,6 +32,15 @@ public class TransactionService {
             AccountDAO accountDAO = new AccountDAO(conn);
             TransactionDAO transactionDAO = new TransactionDAO(conn);
 
+            if (billId != -1) {
+                boolean exists = transactionDAO.findTransactionByBillId(billId);
+                if (exists) {
+                    System.out.println("Duplicate billId detected");
+                    conn.close();
+                    return true;
+                }
+            }
+
             long first = Math.min(senderId, receiverId);
             long second = Math.max(senderId, receiverId);
 

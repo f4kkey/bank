@@ -20,6 +20,8 @@ create table transactions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX idx_billId ON transactions (billId);
+
 CREATE INDEX idx_senderId ON transactions (senderId);
 
 CREATE INDEX idx_receiverId ON transactions (receiverId);

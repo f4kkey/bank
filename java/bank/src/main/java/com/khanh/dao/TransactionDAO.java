@@ -16,6 +16,17 @@ public class TransactionDAO {
         this.conn = conn;
     }
 
+    public boolean findTransactionByBillId(long billId) throws Exception {
+        String sql = "select * from transactions where billId  = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setLong(1, billId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return true;
+        }
+        return false;
+    };
+
     public void addTransaction(long billId, long senderId, long receiverId, long amount) throws Exception {
         String sql = "insert into transactions (billId, senderId, receiverId, amount) values (?,?,?,?)";
         PreparedStatement ps = conn.prepareStatement(sql);

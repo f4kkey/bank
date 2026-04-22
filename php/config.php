@@ -1,7 +1,7 @@
 <?php
 
 define('JAVA_HOST', '127.0.0.1');
-define('JAVA_PORT', 9000);
+define('JAVA_PORT', 12345);
 
 function call_java($data)
 {
