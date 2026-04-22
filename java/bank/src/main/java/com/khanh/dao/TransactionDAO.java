@@ -16,12 +16,13 @@ public class TransactionDAO {
         this.conn = conn;
     }
 
-    public void addTransaction(long senderId, long receiverId, long amount) throws Exception {
-        String sql = "insert into transactions (senderId, receiverId, amount) values (?,?,?)";
+    public void addTransaction(long billId, long senderId, long receiverId, long amount) throws Exception {
+        String sql = "insert into transactions (billId, senderId, receiverId, amount) values (?,?,?,?)";
         PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setLong(1, senderId);
-        ps.setLong(2, receiverId);
-        ps.setLong(3, amount);
+        ps.setLong(1, billId);
+        ps.setLong(2, senderId);
+        ps.setLong(3, receiverId);
+        ps.setLong(4, amount);
         ps.executeUpdate();
     }
 

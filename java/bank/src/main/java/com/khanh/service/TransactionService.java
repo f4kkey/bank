@@ -12,9 +12,11 @@ import com.khanh.util.DBconnnection;
 import com.khanh.model.*;
 
 public class TransactionService {
+    Connection conn = null;
+
     public boolean transfer(long senderId, long receiverId, long amount, long billId) {
         try {
-            Connection conn = DBconnnection.getConnection();
+            conn = DBconnnection.getConnection();
             conn.setAutoCommit(false); // rollback
 
             AccountDAO accountDAO = new AccountDAO(conn);
@@ -44,13 +46,29 @@ public class TransactionService {
                 accountDAO.updateBalance(receiverId, receiver.getBalance());
             }
 
-            transactionDAO.addTransaction(senderId, receiverId, amount);
+            transactionDAO.addTransaction(billId, senderId, receiverId, amount);
 
             conn.commit();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
             return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
