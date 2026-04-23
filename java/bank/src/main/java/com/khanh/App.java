@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import com.khanh.worker.CallbackWorker;
+import com.khanh.worker.TransactionExportWorker;
 
 public class App {
     private static void handle(Socket socket) {
@@ -27,8 +28,11 @@ public class App {
     public static void main(String[] args) throws Exception {
         Thread callbackWorker = new Thread(new CallbackWorker());
         callbackWorker.setDaemon(true);
-        callbackWorker.setName("callback-worker");
         callbackWorker.start();
+
+        Thread transactionExportWorker = new Thread(new TransactionExportWorker());
+        transactionExportWorker.setDaemon(true);
+        transactionExportWorker.start();
 
         ServerSocket server = new ServerSocket(12345);
         System.out.println("java bank server running at 12345");

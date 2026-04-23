@@ -9,13 +9,13 @@ import com.khanh.service.TransactionService;
 import com.khanh.util.DBconnnection;
 
 public class CallbackWorker implements Runnable {
-    private static final int POLL_INTERVAL_SECONDS = 30;
+    private static final int INTERVAL_SECONDS = 30;
     private static final int MAX_ATTEMPTS = 10;
 
     @Override
     public void run() {
-        System.out.println("[CallbackWorker] Started — polling every "
-                + POLL_INTERVAL_SECONDS + "s, max attempts=" + MAX_ATTEMPTS);
+        System.out.println("[CallbackWorker] Started - ping every "
+                + INTERVAL_SECONDS + "s, max attempts=" + MAX_ATTEMPTS);
 
         while (!Thread.currentThread().isInterrupted()) {
             try {
@@ -25,9 +25,9 @@ public class CallbackWorker implements Runnable {
             }
 
             try {
-                Thread.sleep(POLL_INTERVAL_SECONDS * 1000L);
+                Thread.sleep(INTERVAL_SECONDS * 1000L);
             } catch (InterruptedException e) {
-                System.out.println("[CallbackWorker] Interrupted — shutting down.");
+                System.out.println("[CallbackWorker] Interrupted - shutting down.");
                 Thread.currentThread().interrupt();
                 break;
             }
@@ -48,7 +48,7 @@ public class CallbackWorker implements Runnable {
             return;
         }
 
-        System.out.println("[CallbackWorker] Found " + pending.size() + " pending callback(s) to retry.");
+        System.out.println("[CallbackWorker] Found " + pending.size() + " pending callback to retry.");
         TransactionService service = new TransactionService();
 
         for (Transaction tx : pending) {

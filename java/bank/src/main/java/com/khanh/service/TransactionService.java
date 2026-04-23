@@ -13,6 +13,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 import com.khanh.dao.AccountDAO;
+import com.khanh.dao.SystemStateDAO;
 import com.khanh.dao.TransactionDAO;
 import com.khanh.util.DBconnnection;
 import com.khanh.util.RedisUtil;
@@ -74,7 +75,8 @@ public class TransactionService {
             }
 
             transactionDAO.addTransaction(billId, senderId, receiverId, amount);
-
+            SystemStateDAO systemStateDAO = new SystemStateDAO(conn);
+            systemStateDAO.addTransactionUpdated();
             conn.commit();
 
             if (billId != -1) {

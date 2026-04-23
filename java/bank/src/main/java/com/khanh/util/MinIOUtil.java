@@ -1,35 +1,39 @@
-// package com.khanh.util;
+package com.khanh.util;
 
-// import io.github.cdimascio.dotenv.Dotenv;
-// import io.minio.MinioClient;
-// import io.minio.PutObjectArgs;
+import java.io.ByteArrayInputStream;
 
-// public class MinIOUtil {
-// private static final Dotenv dotenv = Dotenv.load();
+import io.github.cdimascio.dotenv.Dotenv;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 
-// private static final String ENDPOINT = dotenv.get("MINIO_URL");
-// private static final String ACCESS_KEY = dotenv.get("MINIO_USER");
-// private static final String SECRET_KEY = dotenv.get("MINIO_PASSWORD");;
+public class MinIOUtil {
+    private static final Dotenv dotenv = Dotenv.load();
 
-// public static MinioClient minioClient;
+    private static final String ENDPOINT = dotenv.get("MINIO_URL");
+    private static final String ACCESS_KEY = dotenv.get("MINIO_USER");
+    private static final String SECRET_KEY = dotenv.get("MINIO_PASSWORD");;
 
-// static {
-// minioClient = MinioClient.builder()
-// .endpoint(ENDPOINT)
-// .credentials(ACCESS_KEY, SECRET_KEY)
-// .build();
-// }
+    public static MinioClient minioClient;
 
-// public static void upload(String bucket, String objectName,
-// java.io.InputStream stream,
-// String contentType) throws Exception {
+    static {
+        minioClient = MinioClient.builder()
+                .endpoint(ENDPOINT)
+                .credentials(ACCESS_KEY, SECRET_KEY)
+                .build();
+    }
 
-// minioClient.putObject(
-// PutObjectArgs.builder()
-// .bucket(bucket)
-// .object(objectName)
-// .stream(stream, stream.available(), -1)
-// .contentType(contentType)
-// .build());
-// }
-// }
+    public static void upload(String bucket, String objectName,
+            String json,
+            String contentType) throws Exception {
+
+        minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(bucket)
+                        .object(objectName)
+                        .stream(new ByteArrayInputStream(json.getBytes()),
+                                json.length(),
+                                -1)
+                        .contentType(contentType)
+                        .build());
+    }
+}
