@@ -8,8 +8,9 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class DBconnnection {
 
+    private static final Dotenv dotenv = Dotenv.load();
+
     public static Connection getConnection() throws Exception {
-        Dotenv dotenv = Dotenv.load();
         String url = dotenv.get("DB_URL");
         String user = dotenv.get("DB_USER");
         String password = dotenv.get("DB_PASSWORD");

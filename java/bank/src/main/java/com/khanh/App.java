@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.khanh.worker.CallbackWorker;
+
 public class App {
     private static void handle(Socket socket) {
         try (BufferedReader in = new BufferedReader(
@@ -23,8 +25,13 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
+        Thread callbackWorker = new Thread(new CallbackWorker());
+        callbackWorker.setDaemon(true);
+        callbackWorker.setName("callback-worker");
+        callbackWorker.start();
+
         ServerSocket server = new ServerSocket(12345);
-        System.out.println("java bank server running at 9000");
+        System.out.println("java bank server running at 12345");
 
         while (true) {
             Socket socket = server.accept();

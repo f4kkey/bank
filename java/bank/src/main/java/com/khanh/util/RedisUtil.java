@@ -3,7 +3,7 @@ package com.khanh.util;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.SetParams;
 
-public class Redis {
+public class RedisUtil {
     private static final String HOST = "localhost";
     private static final int PORT = 6379;
 

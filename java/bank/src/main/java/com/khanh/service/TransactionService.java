@@ -6,26 +6,27 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.Connection;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.checkerframework.checker.units.qual.A;
 import org.json.JSONObject;
 
 import com.khanh.dao.AccountDAO;
 import com.khanh.dao.TransactionDAO;
 import com.khanh.util.DBconnnection;
-import com.khanh.util.Redis;
+import com.khanh.util.RedisUtil;
 import com.khanh.model.*;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class TransactionService {
+    private final Dotenv dotenv = Dotenv.load();
     Connection conn = null;
 
     public boolean transfer(long senderId, long receiverId, long amount, long billId) {
         String redisKey = "bill:" + billId;
         if (billId != -1) {
-            boolean locked = Redis.lock(redisKey, 300);
+            boolean locked = RedisUtil.lock(redisKey, 300);
             if (!locked) {
                 System.out.println("Duplicate billId detected");
                 return true;
@@ -75,6 +76,15 @@ public class TransactionService {
             transactionDAO.addTransaction(billId, senderId, receiverId, amount);
 
             conn.commit();
+
+            if (billId != -1) {
+                final long fBillId = billId;
+                final boolean fSuccess = true;
+                Thread notifyThread = new Thread(() -> notifyShop(fBillId, fSuccess));
+                notifyThread.setDaemon(true);
+                notifyThread.start();
+            }
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,7 +97,7 @@ public class TransactionService {
                 }
             }
             if (billId != -1) {
-                Redis.delete("bill:" + billId);
+                RedisUtil.delete("bill:" + billId);
             }
             return false;
         } finally {
@@ -103,6 +113,48 @@ public class TransactionService {
 
     public boolean transfer(long senderId, long receiverId, long amount) {
         return transfer(senderId, receiverId, amount, -1);
+    }
+
+    public void notifyShop(long billId, boolean success) {
+        String shopUrl = dotenv.get("SERVER_SHOP_URL");
+        String url = shopUrl + "/bill/" + billId + "/payment-result";
+
+        String jsonBody = "{\"billId\":" + billId + ",\"success\":" + success + "}";
+
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(5))
+                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(10))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            String newStatus;
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                newStatus = "SENT";
+                System.out.println("[Callback] Shop notified for billId=" + billId);
+            } else {
+                newStatus = "PENDING";
+                System.err.println("[Callback] Shop returned HTTP " + response.statusCode()
+                        + " for billId=" + billId + " left PENDING");
+            }
+
+            try (Connection statusConn = DBconnnection.getConnection()) {
+                new TransactionDAO(statusConn).updateCallbackStatus(billId, newStatus);
+            }
+
+        } catch (ConnectException | java.net.http.HttpConnectTimeoutException e) {
+            System.err.println("[Callback] Shop unreachable for billId=" + billId
+                    + " left PENDING for retry. (" + e.getMessage() + ")");
+        } catch (Exception e) {
+            System.err.println("[Callback] Unexpected error for billId=" + billId + ": " + e.getMessage());
+        }
     }
 
     public List<Transaction> getTransactionsList() {
@@ -130,7 +182,6 @@ public class TransactionService {
     public String getTransactionDetail(long billId) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-            Dotenv dotenv = Dotenv.load();
             String url = dotenv.get("SERVER_SHOP_URL") + "/bill/" + billId;
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))

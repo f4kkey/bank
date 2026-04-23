@@ -37,6 +37,40 @@ public class TransactionDAO {
         ps.executeUpdate();
     }
 
+    public void updateCallbackStatus(long billId, String status) throws Exception {
+        String sql = "UPDATE transactions " +
+                "SET callback_status = ?, " +
+                "    callback_attempts = callback_attempts + 1, " +
+                "    callback_last_attempt = CURRENT_TIMESTAMP " +
+                "WHERE billId = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, status);
+        ps.setLong(2, billId);
+        ps.executeUpdate();
+    }
+
+    public List<Transaction> getPendingCallbacks(int maxAttempts) throws Exception {
+        List<Transaction> res = new ArrayList<>();
+        String sql = "SELECT * FROM transactions " +
+                "WHERE callback_status != 'SENT' " +
+                "  AND billId != -1 " +
+                "  AND callback_attempts < ? " +
+                "ORDER BY created_at ASC";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, maxAttempts);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            res.add(new Transaction(
+                    rs.getLong("id"),
+                    rs.getLong("billId"),
+                    rs.getLong("senderId"),
+                    rs.getLong("receiverId"),
+                    rs.getLong("amount"),
+                    rs.getTimestamp("created_at")));
+        }
+        return res;
+    }
+
     public List<Transaction> getTransactionsList() throws Exception {
         List<Transaction> res = new ArrayList<>();
 

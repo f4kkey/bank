@@ -15,10 +15,12 @@ create table accounts (
 
 create table transactions (
     id BIGINT auto_increment primary key,
-    billId BIGINT,
+    billId BIGINT DEFAULT -1,
     senderId BIGINT NOT NULL,
     receiverId BIGINT NOT NULL,
     amount BIGINT NOT NULL,
+    callback_status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    callback_attempts INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
