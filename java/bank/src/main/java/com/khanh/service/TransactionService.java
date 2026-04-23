@@ -1,16 +1,23 @@
 package com.khanh.service;
 
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.checkerframework.checker.units.qual.A;
+import org.json.JSONObject;
 
 import com.khanh.dao.AccountDAO;
 import com.khanh.dao.TransactionDAO;
 import com.khanh.util.DBconnnection;
 import com.khanh.util.Redis;
 import com.khanh.model.*;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class TransactionService {
     Connection conn = null;
@@ -117,6 +124,33 @@ public class TransactionService {
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
+        }
+    }
+
+    public String getTransactionDetail(long billId) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            Dotenv dotenv = Dotenv.load();
+            String url = dotenv.get("SERVER_SHOP_URL") + "/bill/" + billId;
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .header("Accept", "application/json")
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                return response.body(); // JSON string
+            } else {
+                throw new RuntimeException("Failed with status: " + response.statusCode());
+            }
+
+        } catch (ConnectException e) {
+            return "Cannot connected";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

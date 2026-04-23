@@ -12,6 +12,9 @@ public class AccountController {
             long id = query.getLong("userId");
 
             long res = new AccountService().getBalance(id);
+            if (res == -1)
+                return new JSONObject().put("status", "ERROR").put("message", "error in get user balance")
+                        .toString();
             return new JSONObject().put("status", "SUCCESS").put("balance", res).toString();
 
         } catch (Exception e) {

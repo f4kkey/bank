@@ -8,7 +8,9 @@ create table accounts (
     id BIGINT auto_increment primary key,
     name varchar(100),
     balance BIGINT DEFAULT 1000000 NOT NULL,
-    role VARCHAR(10) NOT NULL
+    role VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 create table transactions (
@@ -17,7 +19,8 @@ create table transactions (
     senderId BIGINT NOT NULL,
     receiverId BIGINT NOT NULL,
     amount BIGINT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_billId ON transactions (billId);

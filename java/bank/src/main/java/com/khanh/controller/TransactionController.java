@@ -46,4 +46,31 @@ public class TransactionController {
                     .toString();
         }
     }
+
+    public String getTransactionDetail(JSONObject req) {
+        try {
+            JSONObject body = req.optJSONObject("body");
+            JSONObject query = req.optJSONObject("query");
+            long billId = query.optLong("billId", -1);
+
+            if (billId == -1) {
+                return new JSONObject().put("status", "ERROR").put("message", "bill id must exists")
+                        .toString();
+            }
+
+            String res = new TransactionService().getTransactionDetail(billId);
+            if (res.equals("Cannot connected"))
+                return new JSONObject().put("status", "ERROR").put("message", "Can not connected to server shop")
+                        .toString();
+
+            if (res == null) {
+                throw new Exception();
+            }
+            return new JSONObject().put("status", "SUCCESS").put("detail", res).toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new JSONObject().put("status", "ERROR").put("message", "error in transaction detail")
+                    .toString();
+        }
+    }
 }

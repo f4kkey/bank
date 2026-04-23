@@ -23,6 +23,8 @@ public class Router {
                 return new AccountController().getBalance(req);
             if (method.equals("GET") && path.equals("/user/transactions"))
                 return new TransactionController().getPersonalTransactionsList(req);
+            if (method.equals("GET") && path.equals("/transactions/detail"))
+                return new TransactionController().getTransactionDetail(req);
 
             return new JSONObject().put("status", "ERROR").put("message", "Unknown API").toString();
         } catch (Exception e) {
