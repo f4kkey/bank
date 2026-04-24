@@ -72,7 +72,7 @@ public class TransactionController {
         } catch (ConnectErrorException e) {
             return ResponseUtil.response(503, "SHOP_SERVER_UNAVAILABLE", null);
         } catch (Exception e) {
-            return ResponseUtil.response(500, "INTERNAL_SERVER_ERROR", null);
+            return ResponseUtil.response(500, "SYSTEM_ERROR", null);
         }
     }
 }
