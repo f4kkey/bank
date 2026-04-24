@@ -186,8 +186,14 @@ public class TransactionService {
     public List<Transaction> getPersonalTransactionsList(long userId, long transactionId, long billId) {
         try {
             Connection conn = DBconnnection.getConnection();
+            Account account = new AccountDAO(conn).getById(userId);
+            if (account == null) {
+                throw new AccountNotFoundException("User account not found");
+            }
             TransactionDAO transactionDAO = new TransactionDAO(conn);
             return transactionDAO.getPersonalTransactionsList(userId, transactionId, billId);
+        } catch (AccountNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error fetching personal transactions list");

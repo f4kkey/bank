@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.khanh.exception.AccountNotFoundException;
 import com.khanh.exception.ConnectErrorException;
 import com.khanh.exception.DuplicateBillException;
@@ -32,7 +34,7 @@ public class TransactionController {
         } catch (AccountNotFoundException e) {
             return ResponseUtil.response(404, "ACCOUNT_NOT_FOUND", null);
         } catch (InvalidRequestException e) {
-            return ResponseUtil.response(400, "INVALID_REQUEST", null);
+            return ResponseUtil.response(422, "INVALID_REQUEST", null);
         } catch (Exception e) {
             return ResponseUtil.response(500, "SYSTEM_ERROR", null);
         }
@@ -49,7 +51,12 @@ public class TransactionController {
             // Timestamp startDate = query.has("userId") ? query.get("userId") : null;
 
             List<Transaction> res = new TransactionService().getPersonalTransactionsList(userId, transactionId, billId);
-            return ResponseUtil.response(200, "ok", new JSONObject().put("transactions", res));
+            JsonObject data = new JsonObject();
+            data.add("transactions", new Gson().toJsonTree(res));
+
+            return ResponseUtil.response(200, "ok", data);
+        } catch (AccountNotFoundException e) {
+            return ResponseUtil.response(404, "ACCOUNT_NOT_FOUND", null);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseUtil.response(500, "SYSTEM_ERROR", null);
@@ -68,7 +75,9 @@ public class TransactionController {
             }
 
             String res = new TransactionService().getTransactionDetail(billId);
-            return ResponseUtil.response(200, "ok", new JSONObject().put("detail", res));
+            JsonObject data = new JsonObject();
+            data.addProperty("detail", res);
+            return ResponseUtil.response(200, "ok", data);
         } catch (ConnectErrorException e) {
             return ResponseUtil.response(503, "SHOP_SERVER_UNAVAILABLE", null);
         } catch (Exception e) {

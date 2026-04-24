@@ -2,8 +2,10 @@ package com.khanh;
 
 import org.json.JSONObject;
 
+import com.google.gson.JsonObject;
 import com.khanh.controller.AccountController;
 import com.khanh.controller.TransactionController;
+import com.khanh.util.ResponseUtil;
 
 public class Router {
     public String route(String request) {
@@ -15,8 +17,9 @@ public class Router {
 
             System.out.println(request);
 
-            if (method.equals("GET") && path.equals("/test"))
-                return new JSONObject().put("status", "SUCCESS").put("message", "API call").toString();
+            if (method.equals("GET") && path.equals("/test")) {
+                return ResponseUtil.response(200, "OK", null);
+            }
             if (method.equals("POST") && path.equals("/transfer"))
                 return new TransactionController().transfer(req);
             if (method.equals("GET") && path.equals("/user/balance"))

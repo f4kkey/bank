@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 
 public class ResponseUtil {
 
-    public static String response(int code, String message, Object data) {
+    public static String response(int code, String message, JsonObject data) {
         JsonObject obj = new JsonObject();
 
         obj.addProperty("code", code);
