@@ -3,6 +3,7 @@ package com.khanh.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,8 +87,8 @@ public class TransactionDAO {
         return res;
     }
 
-    public List<Transaction> getPersonalTransactionsList(long userId, long transactionId, long billId)
-            throws Exception {
+    public List<Transaction> getPersonalTransactionsList(long userId, long transactionId, long billId, String startDate,
+            String endDate) throws Exception {
         List<Transaction> res = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("SELECT * FROM transactions WHERE (senderId = ? OR receiverId = ?)");
@@ -102,6 +103,15 @@ public class TransactionDAO {
             sql.append(" AND billId = ?");
             params.add(billId);
         }
+        if (startDate != null && !startDate.isEmpty()) {
+            sql.append(" AND created_at >= ?");
+            params.add(Timestamp.valueOf(startDate + " 00:00:00"));
+        }
+
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append(" AND created_at <= ?");
+            params.add(Timestamp.valueOf(endDate + " 23:59:59"));
+        }
         sql.append(" ORDER BY created_at DESC");
 
         PreparedStatement ps = conn.prepareStatement(sql.toString());
@@ -112,8 +122,7 @@ public class TransactionDAO {
         while (rs.next()) {
             res.add(
                     new Transaction(rs.getLong("id"), rs.getLong("billId"), rs.getLong("senderId"),
-                            rs.getLong("receiverId"),
-                            rs.getLong("amount"), rs.getTimestamp("created_at")));
+                            rs.getLong("receiverId"), rs.getLong("amount"), rs.getTimestamp("created_at")));
         }
         return res;
     }
@@ -121,7 +130,7 @@ public class TransactionDAO {
     public static void main(String[] arg) throws Exception {
         Connection conn = DBconnnection.getConnection();
         TransactionDAO transactionDAO = new TransactionDAO(conn);
-        System.out.println(transactionDAO.getPersonalTransactionsList(2, -1, -1));
+        System.out.println(transactionDAO.getPersonalTransactionsList(2, -1, -1, null, null));
 
     }
 }

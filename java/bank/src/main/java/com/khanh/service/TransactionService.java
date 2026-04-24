@@ -183,7 +183,8 @@ public class TransactionService {
         }
     }
 
-    public List<Transaction> getPersonalTransactionsList(long userId, long transactionId, long billId) {
+    public List<Transaction> getPersonalTransactionsList(long userId, long transactionId, long billId, String startDate,
+            String endDate) {
         try {
             Connection conn = DBconnnection.getConnection();
             Account account = new AccountDAO(conn).getById(userId);
@@ -191,7 +192,7 @@ public class TransactionService {
                 throw new AccountNotFoundException("User account not found");
             }
             TransactionDAO transactionDAO = new TransactionDAO(conn);
-            return transactionDAO.getPersonalTransactionsList(userId, transactionId, billId);
+            return transactionDAO.getPersonalTransactionsList(userId, transactionId, billId, startDate, endDate);
         } catch (AccountNotFoundException e) {
             throw e;
         } catch (Exception e) {

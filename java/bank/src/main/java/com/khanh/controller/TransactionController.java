@@ -48,9 +48,11 @@ public class TransactionController {
             long userId = query.getLong("userId");
             long transactionId = query.optLong("transactionId", -1);
             long billId = query.optLong("billId", -1);
-            // Timestamp startDate = query.has("userId") ? query.get("userId") : null;
+            String startDate = query.optString("startDate", null);
+            String endDate = query.optString("endDate", null);
 
-            List<Transaction> res = new TransactionService().getPersonalTransactionsList(userId, transactionId, billId);
+            List<Transaction> res = new TransactionService().getPersonalTransactionsList(userId, transactionId, billId,
+                    startDate, endDate);
             JsonObject data = new JsonObject();
             data.add("transactions", new Gson().toJsonTree(res));
 
