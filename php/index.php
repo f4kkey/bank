@@ -27,4 +27,12 @@ $request = [
 ];
 error_log($uri);
 
-echo call_java($request);
+$response = json_decode(call_java($request), true);
+
+http_response_code($response['code'] ?? 500);
+
+unset($response['code']);
+
+header('Content-Type: application/json');
+
+echo json_encode($response);
