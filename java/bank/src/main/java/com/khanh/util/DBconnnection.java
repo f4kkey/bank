@@ -1,7 +1,5 @@
 package com.khanh.util;
 
-import java.io.File;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import io.github.cdimascio.dotenv.Dotenv;

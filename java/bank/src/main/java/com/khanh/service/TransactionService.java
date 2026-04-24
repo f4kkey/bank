@@ -7,14 +7,17 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.Connection;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
-
-import org.json.JSONObject;
 
 import com.khanh.dao.AccountDAO;
 import com.khanh.dao.SystemStateDAO;
 import com.khanh.dao.TransactionDAO;
+import com.khanh.exception.AccountNotFoundException;
+import com.khanh.exception.ConnectErrorException;
+import com.khanh.exception.DuplicateBillException;
+import com.khanh.exception.InsufficientBalanceException;
+import com.khanh.exception.InternalServerErrorException;
+import com.khanh.exception.InvalidRequestException;
 import com.khanh.util.DBconnnection;
 import com.khanh.util.RedisUtil;
 import com.khanh.model.*;
@@ -24,16 +27,15 @@ public class TransactionService {
     private final Dotenv dotenv = Dotenv.load();
     Connection conn = null;
 
-    public boolean transfer(long senderId, long receiverId, long amount, long billId) {
+    public void transfer(long senderId, long receiverId, long amount, long billId) {
         String redisKey = "bill:" + billId;
         if (billId != -1) {
             boolean locked = RedisUtil.lock(redisKey, 300);
             if (!locked) {
                 System.out.println("Duplicate billId detected");
-                return true;
+                throw new DuplicateBillException("Duplicate billId detected");
             }
         }
-
         try {
             conn = DBconnnection.getConnection();
             conn.setAutoCommit(false); // rollback
@@ -46,7 +48,7 @@ public class TransactionService {
                 if (exists) {
                     System.out.println("Duplicate billId detected");
                     conn.close();
-                    return true;
+                    throw new DuplicateBillException("Duplicate billId detected");
                 }
             }
 
@@ -58,10 +60,18 @@ public class TransactionService {
             Account sender = accountDAO.getById(senderId);
             Account receiver = accountDAO.getById(receiverId);
 
-            if (amount <= 0 || sender == null || receiver == null || senderId == receiverId
-                    || (sender.getBalance() < amount && !sender.getRole().equals("admin"))) {
+            if (sender == null || receiver == null) {
                 conn.rollback();
-                return false;
+                throw new AccountNotFoundException("Sender or receiver account not found");
+            }
+            if (amount <= 0 || senderId == receiverId) {
+                conn.rollback();
+                throw new InvalidRequestException("Invalid data");
+            }
+
+            if ((sender.getBalance() < amount && !sender.getRole().equals("admin"))) {
+                conn.rollback();
+                throw new InsufficientBalanceException("Insufficient balance");
             }
 
             if (!sender.getRole().equals("admin")) {
@@ -86,11 +96,10 @@ public class TransactionService {
                 notifyThread.setDaemon(true);
                 notifyThread.start();
             }
-
-            return true;
+        } catch (DuplicateBillException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
-
             if (conn != null) {
                 try {
                     conn.rollback();
@@ -101,7 +110,11 @@ public class TransactionService {
             if (billId != -1) {
                 RedisUtil.delete("bill:" + billId);
             }
-            return false;
+            if (e instanceof AccountNotFoundException || e instanceof InvalidRequestException
+                    || e instanceof InsufficientBalanceException) {
+                throw (RuntimeException) e;
+            }
+            throw new InternalServerErrorException("Internal server error");
         } finally {
             if (conn != null) {
                 try {
@@ -113,8 +126,8 @@ public class TransactionService {
         }
     }
 
-    public boolean transfer(long senderId, long receiverId, long amount) {
-        return transfer(senderId, receiverId, amount, -1);
+    public void transfer(long senderId, long receiverId, long amount) {
+        transfer(senderId, receiverId, amount, -1);
     }
 
     public void notifyShop(long billId, boolean success) {
@@ -166,7 +179,7 @@ public class TransactionService {
             return transactionDAO.getTransactionsList();
         } catch (Exception e) {
             e.printStackTrace();
-            return new ArrayList<>();
+            throw new RuntimeException("Error fetching transactions list");
         }
     }
 
@@ -177,7 +190,7 @@ public class TransactionService {
             return transactionDAO.getPersonalTransactionsList(userId, transactionId, billId);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ArrayList<>();
+            throw new RuntimeException("Error fetching personal transactions list");
         }
     }
 
@@ -195,37 +208,32 @@ public class TransactionService {
 
             if (response.statusCode() == 200) {
                 return response.body(); // JSON string
-            } else {
-                throw new RuntimeException("Failed with status: " + response.statusCode());
             }
-
+            throw new RuntimeException("Failed with status: " + response.statusCode());
         } catch (ConnectException e) {
-            return "Cannot connected";
+            throw new ConnectErrorException("Cannot connect to shop server");
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new InternalServerErrorException(null);
         }
     }
 
     public static void main(String[] args) {
         TransactionService service = new TransactionService();
-        boolean success = service.transfer(2, 3, 1500000);
-        if (success) {
-            System.out.println("Transfer successful");
-            try {
-                AccountDAO accountDAO = new AccountDAO(DBconnnection.getConnection());
-                Account sender = accountDAO.getById(4);
-                Account receiver = accountDAO.getById(2);
-                System.out.println(sender.getName() + " has balance: " +
-                        sender.getBalance());
-                System.out.println(receiver.getName() + " has balance: " +
-                        receiver.getBalance());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Transfer failed");
+        service.transfer(2, 3, 1500000);
+        System.out.println("Transfer successful");
+        try {
+            AccountDAO accountDAO = new AccountDAO(DBconnnection.getConnection());
+            Account sender = accountDAO.getById(4);
+            Account receiver = accountDAO.getById(2);
+            System.out.println(sender.getName() + " has balance: " +
+                    sender.getBalance());
+            System.out.println(receiver.getName() + " has balance: " +
+                    receiver.getBalance());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error fetching account details");
         }
         System.out.println(service.getTransactionsList());
     }
+
 }

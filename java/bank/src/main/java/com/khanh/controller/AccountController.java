@@ -3,6 +3,7 @@ package com.khanh.controller;
 import org.json.JSONObject;
 
 import com.khanh.service.AccountService;
+import com.khanh.util.ResponseUtil;
 
 public class AccountController {
     public String getBalance(JSONObject req) {
@@ -12,15 +13,12 @@ public class AccountController {
             long id = query.getLong("userId");
 
             long res = new AccountService().getBalance(id);
-            if (res == -1)
-                return new JSONObject().put("status", "ERROR").put("message", "error in get user balance")
-                        .toString();
-            return new JSONObject().put("status", "SUCCESS").put("balance", res).toString();
+
+            return ResponseUtil.response(200, "ok", new JSONObject().put("balance", res));
 
         } catch (Exception e) {
             e.printStackTrace();
-            return new JSONObject().put("status", "ERROR").put("message", "error in get user balance")
-                    .toString();
+            return ResponseUtil.response(500, "error in get user balance", null);
         }
     }
 }

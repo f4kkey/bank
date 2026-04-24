@@ -15,7 +15,7 @@ public class AccountService {
             return account.getBalance();
         } catch (Exception e) {
             e.printStackTrace();
-            return -1;
+            return -1; // indicate error
         }
     }
 }

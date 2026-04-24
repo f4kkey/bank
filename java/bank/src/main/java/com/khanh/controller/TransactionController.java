@@ -1,12 +1,17 @@
 package com.khanh.controller;
 
-import java.security.Timestamp;
 import java.util.List;
 
 import org.json.JSONObject;
 
+import com.khanh.exception.AccountNotFoundException;
+import com.khanh.exception.ConnectErrorException;
+import com.khanh.exception.DuplicateBillException;
+import com.khanh.exception.InsufficientBalanceException;
+import com.khanh.exception.InvalidRequestException;
 import com.khanh.model.Transaction;
 import com.khanh.service.TransactionService;
+import com.khanh.util.ResponseUtil;
 
 public class TransactionController {
     public String transfer(JSONObject req) {
@@ -18,12 +23,18 @@ public class TransactionController {
             long amount = body.getLong("amount");
             long billId = body.optLong("billId", -1);
 
-            boolean res = new TransactionService().transfer(senderId, receiverId, amount, billId);
-            return new JSONObject().put("status", res ? "SUCCESS" : "FAIL").toString();
+            new TransactionService().transfer(senderId, receiverId, amount, billId);
+            return ResponseUtil.response(200, "ok", null);
+        } catch (DuplicateBillException e) {
+            return ResponseUtil.response(409, "DUPLICATE_BILL_ID", null);
+        } catch (InsufficientBalanceException e) {
+            return ResponseUtil.response(422, "INSUFFICIENT_BALANCE", null);
+        } catch (AccountNotFoundException e) {
+            return ResponseUtil.response(404, "ACCOUNT_NOT_FOUND", null);
+        } catch (InvalidRequestException e) {
+            return ResponseUtil.response(400, "INVALID_REQUEST", null);
         } catch (Exception e) {
-            e.printStackTrace();
-            return new JSONObject().put("status", "ERROR").put("message", "error in transaction transfer")
-                    .toString();
+            return ResponseUtil.response(500, "SYSTEM_ERROR", null);
         }
     }
 
@@ -38,12 +49,10 @@ public class TransactionController {
             // Timestamp startDate = query.has("userId") ? query.get("userId") : null;
 
             List<Transaction> res = new TransactionService().getPersonalTransactionsList(userId, transactionId, billId);
-
-            return new JSONObject().put("status", "SUCCESS").put("transactions", res).toString();
+            return ResponseUtil.response(200, "ok", new JSONObject().put("transactions", res));
         } catch (Exception e) {
             e.printStackTrace();
-            return new JSONObject().put("status", "ERROR").put("message", "error in transaction list")
-                    .toString();
+            return ResponseUtil.response(500, "SYSTEM_ERROR", null);
         }
     }
 
@@ -59,18 +68,11 @@ public class TransactionController {
             }
 
             String res = new TransactionService().getTransactionDetail(billId);
-            if (res.equals("Cannot connected"))
-                return new JSONObject().put("status", "ERROR").put("message", "Can not connected to server shop")
-                        .toString();
-
-            if (res == null) {
-                throw new Exception();
-            }
-            return new JSONObject().put("status", "SUCCESS").put("detail", res).toString();
+            return ResponseUtil.response(200, "ok", new JSONObject().put("detail", res));
+        } catch (ConnectErrorException e) {
+            return ResponseUtil.response(503, "SHOP_SERVER_UNAVAILABLE", null);
         } catch (Exception e) {
-            e.printStackTrace();
-            return new JSONObject().put("status", "ERROR").put("message", "error in transaction detail")
-                    .toString();
+            return ResponseUtil.response(500, "INTERNAL_SERVER_ERROR", null);
         }
     }
 }
