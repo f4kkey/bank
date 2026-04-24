@@ -27,7 +27,7 @@ public class TransactionService {
     private final Dotenv dotenv = Dotenv.load();
     Connection conn = null;
 
-    public void transfer(long senderId, long receiverId, long amount, long billId) {
+    public long transfer(long senderId, long receiverId, long amount, long billId) {
         String redisKey = "bill:" + billId;
         if (billId != -1) {
             boolean locked = RedisUtil.lock(redisKey, 300);
@@ -84,7 +84,7 @@ public class TransactionService {
                 accountDAO.updateBalance(receiverId, receiver.getBalance());
             }
 
-            transactionDAO.addTransaction(billId, senderId, receiverId, amount);
+            long res = transactionDAO.addTransaction(billId, senderId, receiverId, amount);
             SystemStateDAO systemStateDAO = new SystemStateDAO(conn);
             systemStateDAO.addTransactionUpdated();
             conn.commit();
@@ -96,6 +96,7 @@ public class TransactionService {
                 notifyThread.setDaemon(true);
                 notifyThread.start();
             }
+            return res;
         } catch (DuplicateBillException e) {
             throw e;
         } catch (Exception e) {

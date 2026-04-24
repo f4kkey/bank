@@ -27,6 +27,15 @@ $request = [
 ];
 error_log($uri);
 
+if (!rate_limit($redis, 100, 60)) {
+    http_response_code(429);
+    echo json_encode([
+        "status" => "ERROR",
+        "message" => "Too many requests"
+    ]);
+    exit;
+}
+
 $response = json_decode(call_java($request), true);
 
 http_response_code($response['code'] ?? 500);

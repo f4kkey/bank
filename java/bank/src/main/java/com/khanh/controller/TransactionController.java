@@ -25,8 +25,10 @@ public class TransactionController {
             long amount = body.getLong("amount");
             long billId = body.optLong("billId", -1);
 
-            new TransactionService().transfer(senderId, receiverId, amount, billId);
-            return ResponseUtil.response(200, "ok", null);
+            long res = new TransactionService().transfer(senderId, receiverId, amount, billId);
+            JsonObject data = new JsonObject();
+            data.add("transactions", new Gson().toJsonTree(res));
+            return ResponseUtil.response(200, "ok", data);
         } catch (DuplicateBillException e) {
             return ResponseUtil.response(409, "DUPLICATE_BILL_ID", null);
         } catch (InsufficientBalanceException e) {

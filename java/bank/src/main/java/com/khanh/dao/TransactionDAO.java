@@ -3,6 +3,7 @@ package com.khanh.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,21 +29,26 @@ public class TransactionDAO {
         return false;
     };
 
-    public void addTransaction(long billId, long senderId, long receiverId, long amount) throws Exception {
+    public Long addTransaction(long billId, long senderId, long receiverId, long amount) throws Exception {
         String sql = "insert into transactions (billId, senderId, receiverId, amount) values (?,?,?,?)";
-        PreparedStatement ps = conn.prepareStatement(sql);
+        PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setLong(1, billId);
         ps.setLong(2, senderId);
         ps.setLong(3, receiverId);
         ps.setLong(4, amount);
         ps.executeUpdate();
+        ResultSet rs = ps.getGeneratedKeys();
+        if (rs.next()) {
+            return rs.getLong(1);
+        } else {
+            throw new Exception("Cannot get generated transaction id");
+        }
     }
 
     public void updateCallbackStatus(long billId, String status) throws Exception {
         String sql = "UPDATE transactions " +
                 "SET callback_status = ?, " +
-                "    callback_attempts = callback_attempts + 1, " +
-                "    callback_last_attempt = CURRENT_TIMESTAMP " +
+                "    callback_attempts = callback_attempts + 1 " +
                 "WHERE billId = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setString(1, status);
