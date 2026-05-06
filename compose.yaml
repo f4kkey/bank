@@ -1,79 +1,74 @@
 services:
-  java:
+  bank:
     build:
       context: ./java/bank
       dockerfile: Dockerfile
-    container_name: java-bank
+    container_name: bank
     restart: always
     env_file:
       - ./java/bank/.env
     depends_on:
-      - db
-      - redis
-      - minio
+      - bank-db
+      - bank-redis
+      - bank-minio
 
-  php:
+  bank-php-gateway:
     build:
       context: ./php
       dockerfile: Dockerfile
-    container_name: php-bank
+    container_name: bank-php-gateway
     restart: always
     environment:
-      JAVA_HOST: java
-      REDIS_HOST: redis
+      JAVA_HOST: bank
+      REDIS_HOST: bank-redis
     depends_on:
-      - java
-      - redis
+      - bank
+      - bank-redis
 
-  nginx:
+  bank-nginx:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    container_name: nginx-bank
+    container_name: bank-nginx
     restart: always
     ports:
-      - "8080:8080"
+      - "8080:80"
     depends_on:
-      - php
+      - bank-php-gateway
 
-  minio:
+  bank-minio:
     image: minio/minio
-    container_name: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
+    container_name: bank-minio
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: 12345678
     volumes:
-      - minio_data:/data
+      - bank_minio_data:/data
     command: server /data --console-address ":9001"
 
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
+  bank-redis:
+    image: redis
+    container_name: bank-redis
     command: redis-server
     volumes:
-      - redis_data:/data
+      - bank_redis_data:/data
 
-  db:
-    image: mariadb:11
-    container_name: mariadb
+  bank-db:
+    image: mariadb
+    container_name: bank-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: bank
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: 1
+      MARIADB_DATABASE: bank
+      MARIADB_USER: user
+      MARIADB_PASSWORD: 1
     ports:
       - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - bank_db_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
 volumes:
-  db_data:
-  minio_data:
-  redis_data:
+  bank_db_data:
+  bank_minio_data:
+  bank_redis_data:
