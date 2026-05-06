@@ -1,10 +1,10 @@
 <?php
 
-define('JAVA_HOST', '127.0.0.1');
+define('JAVA_HOST', getenv('JAVA_HOST') ?: '127.0.0.1');
 define('JAVA_PORT', 12345);
 
 $redis = new Redis();
-$redis->connect('127.0.0.1', 6379); 
+$redis->connect(getenv('REDIS_HOST') ?: '127.0.0.1', 6379); 
 
 function rate_limit($redis, $limit = 100, $window = 60)
 {

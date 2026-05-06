@@ -24,7 +24,6 @@ import com.khanh.model.*;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class TransactionService {
-    private final Dotenv dotenv = Dotenv.load();
     Connection conn = null;
 
     public long transfer(long senderId, long receiverId, long amount, long billId) {
@@ -132,7 +131,7 @@ public class TransactionService {
     }
 
     public void notifyShop(long billId, boolean success) {
-        String shopUrl = dotenv.get("SERVER_SHOP_URL");
+        String shopUrl = System.getenv("SERVER_SHOP_URL");
         String url = shopUrl + "/bill/" + billId + "/payment-result";
 
         String jsonBody = "{\"billId\":" + billId + ",\"success\":" + success + "}";
@@ -205,7 +204,7 @@ public class TransactionService {
     public String getTransactionDetail(long billId) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-            String url = dotenv.get("SERVER_SHOP_URL") + "/bill/" + billId;
+            String url = System.getenv("SERVER_SHOP_URL") + "/bill/" + billId;
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()

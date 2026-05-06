@@ -7,11 +7,10 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 
 public class MinIOUtil {
-    private static final Dotenv dotenv = Dotenv.load();
 
-    private static final String ENDPOINT = dotenv.get("MINIO_URL");
-    private static final String ACCESS_KEY = dotenv.get("MINIO_USER");
-    private static final String SECRET_KEY = dotenv.get("MINIO_PASSWORD");;
+        private static final String ENDPOINT = System.getenv("MINIO_URL");
+        private static final String ACCESS_KEY = System.getenv("MINIO_USER");
+        private static final String SECRET_KEY = System.getenv("MINIO_PASSWORD");
 
     public static MinioClient minioClient;
 

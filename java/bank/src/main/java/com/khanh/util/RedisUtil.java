@@ -4,7 +4,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.SetParams;
 
 public class RedisUtil {
-    private static final String HOST = "localhost";
+    private static final String HOST = System.getenv("REDIS_HOST") != null ? System.getenv("REDIS_HOST") : "localhost";
     private static final int PORT = 6379;
 
     public static boolean lock(String key, long timeout) {

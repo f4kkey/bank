@@ -1,4 +1,41 @@
 services:
+  java:
+    build:
+      context: ./java/bank
+      dockerfile: Dockerfile
+    container_name: java-bank
+    restart: always
+    env_file:
+      - ./java/bank/.env
+    depends_on:
+      - db
+      - redis
+      - minio
+
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: php-bank
+    restart: always
+    environment:
+      JAVA_HOST: java
+      REDIS_HOST: redis
+    depends_on:
+      - java
+      - redis
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx-bank
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - php
+
   minio:
     image: minio/minio
     container_name: minio
@@ -34,6 +71,7 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
 volumes:
   db_data:
