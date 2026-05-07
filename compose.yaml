@@ -75,7 +75,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - bank-php-gateway
+      bank-php-gateway:
+        condition: service_started
 
   bank-minio:
     image: minio/minio
