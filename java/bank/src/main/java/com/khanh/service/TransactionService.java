@@ -10,7 +10,6 @@ import java.time.Duration;
 import java.util.List;
 
 import com.khanh.dao.AccountDAO;
-import com.khanh.dao.SystemStateDAO;
 import com.khanh.dao.TransactionDAO;
 import com.khanh.exception.AccountNotFoundException;
 import com.khanh.exception.ConnectErrorException;
@@ -27,8 +26,8 @@ public class TransactionService {
     Connection conn = null;
 
     public long transfer(long senderId, long receiverId, long amount, long billId) {
-        String redisKey = "bill:" + billId;
         if (billId != -1) {
+            String redisKey = "bill:" + billId;
             boolean locked = RedisUtil.lock(redisKey, 300);
             if (!locked) {
                 System.out.println("Duplicate billId detected");
@@ -46,7 +45,6 @@ public class TransactionService {
                 boolean exists = transactionDAO.findTransactionByBillId(billId);
                 if (exists) {
                     System.out.println("Duplicate billId detected");
-                    conn.close();
                     throw new DuplicateBillException("Duplicate billId detected");
                 }
             }
@@ -84,8 +82,6 @@ public class TransactionService {
             }
 
             long res = transactionDAO.addTransaction(billId, senderId, receiverId, amount);
-            SystemStateDAO systemStateDAO = new SystemStateDAO(conn);
-            systemStateDAO.addTransactionUpdated();
             conn.commit();
 
             if (billId != -1) {
