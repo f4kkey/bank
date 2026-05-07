@@ -200,13 +200,13 @@ public class TransactionService {
     public String getTransactionDetail(long billId) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-            String url = System.getenv("SERVER_SHOP_URL") + "/bill/" + billId;
+            String url = System.getenv("SERVER_SHOP_URL") + "/order/" + billId;
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
                     .header("Accept", "application/json")
                     .build();
-
+            System.out.println(url);
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {

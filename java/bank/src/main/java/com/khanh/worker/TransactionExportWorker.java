@@ -47,7 +47,7 @@ public class TransactionExportWorker implements Runnable {
                 MinIOUtil.upload("transactions", "transactions" + t.getCreatedAt() + ".json", json,
                         "application/json");
 
-                System.out.println("[TransactionExportWorker] Uploaded transaction" + t.getId() + "to MinIO!");
+                System.out.println("[TransactionExportWorker] Uploaded transaction " + t.getId() + " to MinIO!");
                 transactionDAO.markTransactionAsSaved(t.getId());
             }
 

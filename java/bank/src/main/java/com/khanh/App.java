@@ -30,9 +30,9 @@ public class App {
         // callbackWorker.setDaemon(true);
         // callbackWorker.start();
 
-        // Thread transactionExportWorker = new Thread(new TransactionExportWorker());
-        // transactionExportWorker.setDaemon(true);
-        // transactionExportWorker.start();
+        Thread transactionExportWorker = new Thread(new TransactionExportWorker());
+        transactionExportWorker.setDaemon(true);
+        transactionExportWorker.start();
 
         ServerSocket server = new ServerSocket(12345);
         System.out.println("java bank server running at 12345");

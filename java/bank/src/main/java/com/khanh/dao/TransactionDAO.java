@@ -143,7 +143,7 @@ public class TransactionDAO {
 
     public List<Transaction> getUnsaveTransactions() throws Exception {
         List<Transaction> res = new ArrayList<>();
-        String sql = "select id from transaction where save = false ORDER by created_at DESC";
+        String sql = "select * from transactions where save = false ORDER by created_at";
         PreparedStatement ps = conn.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
@@ -160,7 +160,7 @@ public class TransactionDAO {
     }
 
     public void markTransactionAsSaved(long id) throws Exception {
-        String sql = "update transaction set save = true where id = ?";
+        String sql = "update transactions set save = true where id = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setLong(1, id);
         ps.executeUpdate();

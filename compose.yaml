@@ -22,8 +22,10 @@ services:
       JAVA_HOST: bank
       REDIS_HOST: bank-redis
     depends_on:
-      - bank
-      - bank-redis
+      bank:
+        condition: service_started
+      bank-redis:
+        condition: service_started
 
   bank-nginx:
     build:
@@ -43,6 +45,9 @@ services:
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: 12345678
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - bank_minio_data:/data
     command: server /data --console-address ":9001"
