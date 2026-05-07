@@ -9,17 +9,17 @@ import io.minio.PutObjectArgs;
 
 public class MinIOUtil {
 
-        private static final String ENDPOINT = System.getenv("MINIO_URL");
-        private static final String ACCESS_KEY = System.getenv("MINIO_USER");
-        private static final String SECRET_KEY = System.getenv("MINIO_PASSWORD");
-
         public static MinioClient minioClient;
 
         static {
                 try {
+                        String endpoint  = SecretStore.get("minio_url");
+                        String accessKey = SecretStore.get("minio_user");
+                        String secretKey = SecretStore.get("minio_password");
+
                         minioClient = MinioClient.builder()
-                                        .endpoint(ENDPOINT)
-                                        .credentials(ACCESS_KEY, SECRET_KEY)
+                                        .endpoint(endpoint)
+                                        .credentials(accessKey, secretKey)
                                         .build();
 
                         String bucket = "transactions";

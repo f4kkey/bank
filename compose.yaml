@@ -6,23 +6,50 @@ services:
     container_name: bank
     restart: always
     environment:
-      MARIADB_URL: jdbc:mariadb://bank-db:3306/bank
-      MARIADB_ROOT_PASSWORD: 1
-      MARIADB_DATABASE: bank
-      MARIADB_USER: user
-      MARIADB_PASSWORD: 1
-      
-      MINIO_URL: http://bank-minio:9000
-      MINIO_USER: admin
-      MINIO_PASSWORD: 12345678
-
-      REDIS_HOST: bank-redis
-
-      SERVER_SHOP_URL: http://shop-nginx
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: ${VAULT_TOKEN}
     depends_on:
-      - bank-db
-      - bank-redis
-      - bank-minio
+      bank-db:
+        condition: service_started
+      bank-redis:
+        condition: service_started
+      bank-minio:
+        condition: service_started
+      bank-vault-init:
+        condition: service_completed_successfully
+
+  # One-shot container: waits for Vault, then seeds all bank secrets via KV v2.
+  # Runs on every `docker compose up`; idempotent (kv put overwrites existing).
+  bank-vault-init:
+    image: hashicorp/vault
+    container_name: bank-vault-init
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: ${VAULT_TOKEN}
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        echo "[vault-init] Waiting for Vault to be ready..."
+        until vault status > /dev/null 2>&1; do
+          echo "[vault-init] Vault not ready yet, retrying in 2s..."
+          sleep 2
+        done
+        echo "[vault-init] Vault is ready. Enabling KV v2 secrets engine..."
+        vault secrets enable -path=secret kv-v2 2>/dev/null || true
+        echo "[vault-init] Writing bank secrets..."
+        vault kv put secret/bank \
+          mariadb_url="jdbc:mariadb://bank-db:3306/bank" \
+          mariadb_user="user" \
+          mariadb_password="1" \
+          minio_url="http://bank-minio:9000" \
+          minio_user="admin" \
+          minio_password="12345678" \
+          redis_host="bank-redis" \
+          server_shop_url="http://shop-nginx"
+        echo "[vault-init] Secrets written successfully."
+    depends_on:
+      - bank-vault
 
   bank-php-gateway:
     build:
@@ -48,8 +75,7 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      bank-php-gateway:
-        condition: service_healthy
+      - bank-php-gateway
 
   bank-minio:
     image: minio/minio
@@ -85,6 +111,18 @@ services:
     volumes:
       - bank_db_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  bank-vault:
+    image: hashicorp/vault
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_TOKEN}
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+      VAULT_DISABLE_MLOCK: "true"
+    entrypoint: vault
+    command: server -dev
 
 volumes:
   bank_db_data:
