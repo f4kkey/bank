@@ -5,8 +5,20 @@ services:
       dockerfile: Dockerfile
     container_name: bank
     restart: always
-    env_file:
-      - .env
+    environment:
+      MARIADB_URL: jdbc:mariadb://bank-db:3306/bank
+      MARIADB_ROOT_PASSWORD: 1
+      MARIADB_DATABASE: bank
+      MARIADB_USER: user
+      MARIADB_PASSWORD: 1
+      
+      MINIO_URL: http://bank-minio:9000
+      MINIO_USER: admin
+      MINIO_PASSWORD: 12345678
+
+      REDIS_HOST: bank-redis
+
+      SERVER_SHOP_URL: http://shop-nginx
     depends_on:
       - bank-db
       - bank-redis
