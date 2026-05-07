@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.khanh.dao.SystemStateDAO;
 import com.khanh.dao.TransactionDAO;
 import com.khanh.model.Transaction;
 import com.khanh.util.DBconnnection;
@@ -35,20 +34,22 @@ public class TransactionExportWorker implements Runnable {
 
     private void processExporting() {
         try (Connection conn = DBconnnection.getConnection()) {
-            SystemStateDAO systemStateDAO = new SystemStateDAO(conn);
-            if (!systemStateDAO.isTransactionNeededUpdated())
-                return;
 
             TransactionDAO transactionDAO = new TransactionDAO(conn);
-            List<Transaction> list = transactionDAO.getTransactionsList();
-            Gson gson = new Gson();
-            String json = gson.toJson(list);
+            List<Transaction> list = transactionDAO.getUnsaveTransactions();
+            if (list.isEmpty()) {
+                return;
+            }
+            for (Transaction t : list) {
+                Gson gson = new Gson();
+                String json = gson.toJson(t);
 
-            MinIOUtil.upload("transactions", "transactions.json", json, "application/json");
+                MinIOUtil.upload("transactions", "transactions" + t.getCreatedAt() + ".json", json,
+                        "application/json");
 
-            System.out.println("[TransactionExportWorker] Uploaded to MinIO!");
-
-            systemStateDAO.removeTransactionUpdated();
+                System.out.println("[TransactionExportWorker] Uploaded transaction" + t.getId() + "to MinIO!");
+                transactionDAO.markTransactionAsSaved(t.getId());
+            }
 
         } catch (Exception e) {
             System.err.println("[TransactionExportWorker] Cannot fetch update from DB: " + e.getMessage());

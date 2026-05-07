@@ -86,9 +86,12 @@ public class TransactionDAO {
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             res.add(
-                    new Transaction(rs.getLong("id"), rs.getLong("billId"), rs.getLong("senderId"),
+                    new Transaction(rs.getLong("id"),
+                            rs.getLong("billId"),
+                            rs.getLong("senderId"),
                             rs.getLong("receiverId"),
-                            rs.getLong("amount"), rs.getTimestamp("created_at")));
+                            rs.getLong("amount"),
+                            rs.getTimestamp("created_at")));
         }
         return res;
     }
@@ -127,10 +130,40 @@ public class TransactionDAO {
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             res.add(
-                    new Transaction(rs.getLong("id"), rs.getLong("billId"), rs.getLong("senderId"),
-                            rs.getLong("receiverId"), rs.getLong("amount"), rs.getTimestamp("created_at")));
+                    new Transaction(
+                            rs.getLong("id"),
+                            rs.getLong("billId"),
+                            rs.getLong("senderId"),
+                            rs.getLong("receiverId"),
+                            rs.getLong("amount"),
+                            rs.getTimestamp("created_at")));
         }
         return res;
+    }
+
+    public List<Transaction> getUnsaveTransactions() throws Exception {
+        List<Transaction> res = new ArrayList<>();
+        String sql = "select id from transaction where save = false ORDER by created_at DESC";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            res.add(
+                    new Transaction(
+                            rs.getLong("id"),
+                            rs.getLong("billId"),
+                            rs.getLong("senderId"),
+                            rs.getLong("receiverId"),
+                            rs.getLong("amount"),
+                            rs.getTimestamp("created_at")));
+        }
+        return res;
+    }
+
+    public void markTransactionAsSaved(long id) throws Exception {
+        String sql = "update transaction set save = true where id = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setLong(1, id);
+        ps.executeUpdate();
     }
 
     public static void main(String[] arg) throws Exception {

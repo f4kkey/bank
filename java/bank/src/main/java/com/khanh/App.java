@@ -26,13 +26,13 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
-        Thread callbackWorker = new Thread(new CallbackWorker());
-        callbackWorker.setDaemon(true);
-        callbackWorker.start();
+        // Thread callbackWorker = new Thread(new CallbackWorker());
+        // callbackWorker.setDaemon(true);
+        // callbackWorker.start();
 
-        Thread transactionExportWorker = new Thread(new TransactionExportWorker());
-        transactionExportWorker.setDaemon(true);
-        transactionExportWorker.start();
+        // Thread transactionExportWorker = new Thread(new TransactionExportWorker());
+        // transactionExportWorker.setDaemon(true);
+        // transactionExportWorker.start();
 
         ServerSocket server = new ServerSocket(12345);
         System.out.println("java bank server running at 12345");

@@ -6,7 +6,7 @@ services:
     container_name: bank
     restart: always
     env_file:
-      - ./java/bank/.env
+      - .env
     depends_on:
       - bank-db
       - bank-redis
@@ -34,7 +34,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - bank-php-gateway
+      bank-php-gateway:
+        condition: service_healthy
 
   bank-minio:
     image: minio/minio
