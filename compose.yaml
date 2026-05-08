@@ -10,7 +10,7 @@ services:
       VAULT_TOKEN: ${VAULT_TOKEN}
     depends_on:
       bank-db:
-        condition: service_started
+        condition: service_healthy
       bank-redis:
         condition: service_started
       bank-minio:
@@ -72,8 +72,6 @@ services:
       dockerfile: Dockerfile
     container_name: bank-nginx
     restart: always
-    ports:
-      - "8080:80"
     depends_on:
       bank-php-gateway:
         condition: service_started
@@ -112,6 +110,12 @@ services:
     volumes:
       - bank_db_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   bank-vault:
     image: hashicorp/vault
