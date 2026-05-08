@@ -201,16 +201,15 @@ public class TransactionService {
     public String getTransactionDetail(long billId) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-            String url = SecretStore.get("server_shop_url") + "/order/" + billId;
+            String url = SecretStore.get("server_shop_url") + "/orders/" + billId;
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
                     .header("Accept", "application/json")
                     .build();
-            System.out.println(url);
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
             if (response.statusCode() == 200) {
+
                 return response.body(); // JSON string
             }
             throw new RuntimeException("Failed with status: " + response.statusCode());
