@@ -20,7 +20,7 @@ import com.khanh.exception.InvalidRequestException;
 import com.khanh.util.DBconnnection;
 import com.khanh.util.RedisUtil;
 import com.khanh.model.*;
-import com.khanh.util.SecretStore;
+// import com.khanh.util.SecretStore;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class TransactionService {
@@ -128,7 +128,8 @@ public class TransactionService {
     }
 
     public void notifyShop(long billId, boolean success) {
-        String shopUrl = SecretStore.get("server_shop_url");
+        // String shopUrl = SecretStore.get("server_shop_url");
+        String shopUrl = System.getenv("SERVER_SHOP_URL");
         String url = shopUrl + "/bill/" + billId + "/payment-result";
 
         String jsonBody = "{\"billId\":" + billId + ",\"success\":" + success + "}";
@@ -201,7 +202,8 @@ public class TransactionService {
     public String getTransactionDetail(long billId) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-            String url = SecretStore.get("server_shop_url") + "/orders/" + billId;
+            // String url = SecretStore.get("server_shop_url") + "/orders/" + billId;
+            String url = System.getenv("SERVER_SHOP_URL") + "/orders/" + billId;
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()

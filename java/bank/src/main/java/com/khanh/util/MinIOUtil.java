@@ -13,9 +13,12 @@ public class MinIOUtil {
 
         static {
                 try {
-                        String endpoint  = SecretStore.get("minio_url");
-                        String accessKey = SecretStore.get("minio_user");
-                        String secretKey = SecretStore.get("minio_password");
+                        // String endpoint = SecretStore.get("minio_url");
+                        // String accessKey = SecretStore.get("minio_user");
+                        // String secretKey = SecretStore.get("minio_password");
+                        String endpoint = System.getenv("MINIO_URL");
+                        String accessKey = System.getenv("MINIO_USER");
+                        String secretKey = System.getenv("MINIO_PASSWORD");
 
                         minioClient = MinioClient.builder()
                                         .endpoint(endpoint)

@@ -17,7 +17,7 @@ public class VaultClient {
     private static final String VAULT_TOKEN = System.getenv("VAULT_TOKEN") != null ? System.getenv("VAULT_TOKEN")
             : "root";
 
-    private static final int MAX_RETRIES = 10;
+    private static final int MAX_RETRIES = 3;
     private static final long RETRY_DELAY_MS = 3000;
 
     private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
