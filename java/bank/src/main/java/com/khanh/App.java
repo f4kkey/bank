@@ -26,9 +26,9 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
-        // Thread callbackWorker = new Thread(new CallbackWorker());
-        // callbackWorker.setDaemon(true);
-        // callbackWorker.start();
+        Thread callbackWorker = new Thread(new CallbackWorker());
+        callbackWorker.setDaemon(true);
+        callbackWorker.start();
 
         Thread transactionExportWorker = new Thread(new TransactionExportWorker());
         transactionExportWorker.setDaemon(true);
