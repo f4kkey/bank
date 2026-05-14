@@ -18,6 +18,7 @@ import com.khanh.exception.InsufficientBalanceException;
 import com.khanh.exception.InternalServerErrorException;
 import com.khanh.exception.InvalidRequestException;
 import com.khanh.util.DBconnnection;
+import com.khanh.util.HmacUtil;
 import com.khanh.util.RedisUtil;
 import com.khanh.model.*;
 // import com.khanh.util.SecretStore;
@@ -139,10 +140,16 @@ public class TransactionService {
                     .connectTimeout(Duration.ofSeconds(5))
                     .build();
 
+            // Sign the request with HMAC for inter-service authentication
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String signature = HmacUtil.sign(timestamp, jsonBody);
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .timeout(Duration.ofSeconds(10))
                     .header("Content-Type", "application/json")
+                    .header("X-Internal-Signature", signature)
+                    .header("X-Internal-Timestamp", timestamp)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
@@ -204,10 +211,16 @@ public class TransactionService {
             HttpClient client = HttpClient.newHttpClient();
             // String url = SecretStore.get("server_shop_url") + "/orders/" + billId;
             String url = System.getenv("SERVER_SHOP_URL") + "/orders/" + billId;
+            // Sign the request with HMAC for inter-service authentication
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String signature = HmacUtil.sign(timestamp, "");
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
                     .header("Accept", "application/json")
+                    .header("X-Internal-Signature", signature)
+                    .header("X-Internal-Timestamp", timestamp)
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {

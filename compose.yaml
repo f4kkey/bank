@@ -17,6 +17,7 @@ services:
       MINIO_PASSWORD: 12345678
 
       SERVER_SHOP_URL: http://shop-nginx
+      INTERNAL_API_SECRET: b8f2a9c1-4e3d-4a7b-9f1e-6d5c8a2b3e4f
     depends_on:
       bank-db:
         condition: service_healthy
@@ -34,6 +35,7 @@ services:
     environment:
       JAVA_HOST: bank
       REDIS_HOST: bank-redis
+      INTERNAL_API_SECRET: b8f2a9c1-4e3d-4a7b-9f1e-6d5c8a2b3e4f
     depends_on:
       bank:
         condition: service_started
