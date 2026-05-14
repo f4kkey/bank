@@ -77,10 +77,10 @@ public class TransactionController {
                 return new JSONObject().put("status", "ERROR").put("message", "bill id must exists")
                         .toString();
             }
-
             String res = new TransactionService().getTransactionDetail(billId);
             JsonObject data = new JsonObject();
-            data.addProperty("detail", res);
+            JsonObject detailObj = new Gson().fromJson(res, JsonObject.class);
+            data.add("detail", detailObj);
             return ResponseUtil.response(200, "ok", data);
         } catch (ConnectErrorException e) {
             return ResponseUtil.response(503, "SHOP_SERVER_UNAVAILABLE", null);

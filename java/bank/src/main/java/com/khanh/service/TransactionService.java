@@ -224,7 +224,6 @@ public class TransactionService {
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-
                 return response.body(); // JSON string
             }
             throw new RuntimeException("Failed with status: " + response.statusCode());
