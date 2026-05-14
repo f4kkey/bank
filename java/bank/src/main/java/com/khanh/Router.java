@@ -17,13 +17,14 @@ public class Router {
 
             System.out.println(request);
 
-            if (method.equals("GET") && path.equals("/test")) {
+            if (method.equals("GET") && path.equals("/test"))
                 return ResponseUtil.response(200, "OK", null);
-            }
             if (method.equals("POST") && path.equals("/transfer"))
                 return new TransactionController().transfer(req);
             if (method.equals("GET") && path.equals("/user/balance"))
                 return new AccountController().getBalance(req);
+            if (method.equals("POST") && path.equals("/user/create"))
+                return new AccountController().createAccount(req);
             if (method.equals("GET") && path.equals("/user/transactions"))
                 return new TransactionController().getPersonalTransactionsList(req);
             if (method.equals("GET") && path.equals("/transactions/detail"))

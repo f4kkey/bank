@@ -10,6 +10,24 @@ import com.khanh.service.AccountService;
 import com.khanh.util.ResponseUtil;
 
 public class AccountController {
+    public String createAccount(JSONObject req) {
+        try {
+            JSONObject body = req.optJSONObject("body");
+            JSONObject query = req.optJSONObject("query");
+            long id = body.getLong("id");
+            String name = body.getString("name");
+            long balance = body.getLong("balance");
+            String role = body.getString("role");
+            System.out.println("Creating account: " + id + ", " + name + ", " + balance + ", " + role);
+            new AccountService().createAccount(id, name, balance, role);
+            return ResponseUtil.response(200, "OK", null);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseUtil.response(500, "SYSTEM_ERROR", null);
+        }
+    }
+
     public String getBalance(JSONObject req) {
         try {
             JSONObject body = req.optJSONObject("body");

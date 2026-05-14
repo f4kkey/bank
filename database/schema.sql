@@ -1,11 +1,11 @@
 use bank;
 
-drop table if exists accounts;
+drop table accounts;
 
-drop table if exists transactions;
+drop table transactions;
 
 create table accounts (
-    id BIGINT auto_increment primary key,
+    id BIGINT AUTO_INCREMENT primary key,
     name varchar(100),
     balance BIGINT DEFAULT 1000000 NOT NULL,
     role VARCHAR(10) NOT NULL,
@@ -29,9 +29,4 @@ create table transactions (
     INDEX idx_receiverId (receiverId)
 );
 
-insert into
-    accounts (name, role)
-values ('user1', 'user'),
-    ('user2', 'user'),
-    ('user3', 'user'),
-    ('admin', 'admin');
+insert into accounts (name, role) values ('admin', 'admin');

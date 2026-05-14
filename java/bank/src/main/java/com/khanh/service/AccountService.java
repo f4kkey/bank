@@ -8,6 +8,17 @@ import com.khanh.model.Account;
 import com.khanh.util.DBconnnection;
 
 public class AccountService {
+    public void createAccount(long id, String name, long balance, String role) {
+        try {
+            Connection conn = DBconnnection.getConnection();
+            AccountDAO accountDAO = new AccountDAO(conn);
+            accountDAO.createAccount(id, name, balance, role);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error creating account");
+        }
+    }
+
     public long getBalance(long id) {
         try {
             Connection conn = DBconnnection.getConnection();

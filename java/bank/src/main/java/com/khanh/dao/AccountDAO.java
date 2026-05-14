@@ -14,6 +14,16 @@ public class AccountDAO {
         this.conn = conn;
     }
 
+    public void createAccount(long id, String name, long balance, String role) throws Exception {
+        String sql = "insert into accounts(id, name, balance, role) values(?,?,?,?)";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setLong(1, id);
+        ps.setString(2, name);
+        ps.setLong(3, balance);
+        ps.setString(4, role);
+        ps.executeUpdate();
+    }
+
     public Account getById(long id) throws Exception {
         String sql = "select * from accounts where id = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
