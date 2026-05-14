@@ -16,10 +16,9 @@ public class AccountController {
             JSONObject query = req.optJSONObject("query");
             long id = body.getLong("id");
             String name = body.getString("name");
-            long balance = body.getLong("balance");
             String role = body.getString("role");
-            System.out.println("Creating account: " + id + ", " + name + ", " + balance + ", " + role);
-            new AccountService().createAccount(id, name, balance, role);
+            System.out.println("Creating account: " + id + ", " + name + ", " + role);
+            new AccountService().createAccount(id, name, role);
             return ResponseUtil.response(200, "OK", null);
 
         } catch (Exception e) {

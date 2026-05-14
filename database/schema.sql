@@ -1,3 +1,4 @@
+-- Active: 1776306199883@@127.0.0.1@3306@bank
 use bank;
 
 drop table accounts;

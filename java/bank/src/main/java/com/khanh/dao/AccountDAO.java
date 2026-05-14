@@ -14,13 +14,12 @@ public class AccountDAO {
         this.conn = conn;
     }
 
-    public void createAccount(long id, String name, long balance, String role) throws Exception {
-        String sql = "insert into accounts(id, name, balance, role) values(?,?,?,?)";
+    public void createAccount(long id, String name, String role) throws Exception {
+        String sql = "insert into accounts(id, name, role) values(?,?,?)";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setLong(1, id);
         ps.setString(2, name);
-        ps.setLong(3, balance);
-        ps.setString(4, role);
+        ps.setString(3, role);
         ps.executeUpdate();
     }
 
