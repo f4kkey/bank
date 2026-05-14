@@ -23,8 +23,15 @@ public class Router {
                 return new TransactionController().transfer(req);
             if (method.equals("GET") && path.equals("/user/balance"))
                 return new AccountController().getBalance(req);
-            if (method.equals("POST") && path.equals("/user/create"))
+            if (method.equals("POST") && path.equals("/user/create")) {
+                // Only allow inter-service calls (from auth-service via HMAC)
+                JSONObject headers = req.optJSONObject("headers");
+                String authSource = headers != null ? headers.optString("X-Internal-Source", "") : "";
+                if (!"HMAC".equals(authSource)) {
+                    return ResponseUtil.response(403, "Forbidden: internal API only", null);
+                }
                 return new AccountController().createAccount(req);
+            }
             if (method.equals("GET") && path.equals("/user/transactions"))
                 return new TransactionController().getPersonalTransactionsList(req);
             if (method.equals("GET") && path.equals("/transactions/detail"))

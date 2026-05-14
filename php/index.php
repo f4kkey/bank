@@ -66,6 +66,9 @@ if (!$isInternalCall && !$isKongCall) {
     exit;
 }
 
+// Tag auth source so Java can enforce per-route access control
+$headers['X-Internal-Source'] = $isInternalCall ? 'HMAC' : 'KONG';
+
 $request = [
     "method" => $method,
     "path" => $path,
