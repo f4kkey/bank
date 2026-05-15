@@ -30,12 +30,14 @@ public class TransactionDAO {
     };
 
     public Long addTransaction(long billId, long senderId, long receiverId, long amount) throws Exception {
-        String sql = "insert into transactions (billId, senderId, receiverId, amount) values (?,?,?,?)";
+        String callback_status = billId == -1 ? "SENT" : "PENDING";
+        String sql = "insert into transactions (billId, senderId, receiverId, amount, callback_status) values (?,?,?,?,?)";
         PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setLong(1, billId);
         ps.setLong(2, senderId);
         ps.setLong(3, receiverId);
         ps.setLong(4, amount);
+        ps.setString(5, callback_status);
         ps.executeUpdate();
         ResultSet rs = ps.getGeneratedKeys();
         if (rs.next()) {

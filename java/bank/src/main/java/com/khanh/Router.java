@@ -80,7 +80,7 @@ public class Router {
             if (method.equals("GET") && path.equals("/user/balance"))
                 return authentication(req, r -> new AccountController().getBalance(r));
 
-            if (method.equals("GET") && path.equals("/user/transactions"))
+            if (method.equals("GET") && path.equals("/transactions"))
                 return authentication(req, r -> new TransactionController().getPersonalTransactionsList(r));
 
             if (method.equals("GET") && path.equals("/transactions/detail"))
