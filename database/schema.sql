@@ -1,9 +1,10 @@
 -- Active: 1776306199883@@127.0.0.1@3306@bank
+CREATE DATABASE IF NOT EXISTS bank;
+
 use bank;
 
-drop table accounts;
-
-drop table transactions;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS transactions;
 
 create table accounts (
     id BIGINT AUTO_INCREMENT primary key,
