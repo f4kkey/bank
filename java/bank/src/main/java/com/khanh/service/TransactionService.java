@@ -25,10 +25,8 @@ import com.khanh.model.*;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class TransactionService {
-    Connection conn = null;
-
     public long transfer(long senderId, long receiverId, long amount, long billId, long currentUserId,
-            String currentUserRole) {
+                         String currentUserRole) {
         if (billId != -1) {
             String redisKey = "bill:" + billId;
             boolean locked = RedisUtil.lock(redisKey, 300);
@@ -37,9 +35,9 @@ public class TransactionService {
                 throw new DuplicateBillException("Duplicate billId detected");
             }
         }
-        try {
-            conn = DBconnnection.getConnection();
-            conn.setAutoCommit(false); // rollback
+
+        try (Connection conn = DBconnnection.getConnection();) {
+            conn.setAutoCommit(false);
 
             AccountDAO accountDAO = new AccountDAO(conn);
             TransactionDAO transactionDAO = new TransactionDAO(conn);
@@ -104,13 +102,6 @@ public class TransactionService {
             throw e;
         } catch (Exception e) {
             e.printStackTrace();
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
             if (billId != -1) {
                 RedisUtil.delete("bill:" + billId);
             }
@@ -119,17 +110,8 @@ public class TransactionService {
                 throw (RuntimeException) e;
             }
             throw new InternalServerErrorException("Internal server error");
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
-
     public void notifyShop(long billId, boolean success) {
         // String shopUrl = SecretStore.get("server_shop_url");
         String shopUrl = System.getenv("SERVER_SHOP_URL");
@@ -180,8 +162,7 @@ public class TransactionService {
     }
 
     public List<Transaction> getTransactionsList() {
-        try {
-            Connection conn = DBconnnection.getConnection();
+        try (Connection conn = DBconnnection.getConnection();){
             TransactionDAO transactionDAO = new TransactionDAO(conn);
             return transactionDAO.getTransactionsList();
         } catch (Exception e) {
@@ -199,11 +180,10 @@ public class TransactionService {
                 throw new InvalidRequestException("userId is required");
             }
         }
-        try {
+        try (Connection conn = DBconnnection.getConnection();){
             if (!currentUserRole.equals("ADMIN") && currentUserId != userId) {
                 throw new InvalidRequestException("Cannot view other user's transactions");
             }
-            Connection conn = DBconnnection.getConnection();
             Account account = new AccountDAO(conn).getById(userId);
             if (account == null) {
                 throw new AccountNotFoundException("User account not found");

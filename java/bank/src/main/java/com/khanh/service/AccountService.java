@@ -9,8 +9,7 @@ import com.khanh.util.DBconnnection;
 
 public class AccountService {
     public void createAccount(long id, String name, String role) {
-        try {
-            Connection conn = DBconnnection.getConnection();
+        try (Connection conn = DBconnnection.getConnection();) {
             AccountDAO accountDAO = new AccountDAO(conn);
             accountDAO.createAccount(id, name, role);
         } catch (Exception e) {
@@ -20,8 +19,7 @@ public class AccountService {
     }
 
     public long getBalance(long id) {
-        try {
-            Connection conn = DBconnnection.getConnection();
+        try (Connection conn = DBconnnection.getConnection();) {
             AccountDAO accountDAO = new AccountDAO(conn);
             Account account = accountDAO.getById(id);
             if (account == null) {
