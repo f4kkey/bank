@@ -24,8 +24,10 @@ public class TransactionController {
             long receiverId = body.getLong("receiverId");
             long amount = body.getLong("amount");
             long billId = body.optLong("billId", -1);
-
-            long res = new TransactionService().transfer(senderId, receiverId, amount, billId);
+            long currentUserId = req.getLong("userId");
+            String currentUserRole = req.optString("role", "");
+            long res = new TransactionService().transfer(senderId, receiverId, amount, billId, currentUserId,
+                    currentUserRole);
             JsonObject data = new JsonObject();
             data.add("transactions", new Gson().toJsonTree(res));
             return ResponseUtil.response(200, "ok", data);
@@ -38,6 +40,7 @@ public class TransactionController {
         } catch (InvalidRequestException e) {
             return ResponseUtil.response(422, "INVALID_REQUEST", null);
         } catch (Exception e) {
+            System.out.println("Error processing transfer: " + e.getMessage());
             return ResponseUtil.response(500, "SYSTEM_ERROR", null);
         }
     }

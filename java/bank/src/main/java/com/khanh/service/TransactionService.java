@@ -27,7 +27,8 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class TransactionService {
     Connection conn = null;
 
-    public long transfer(long senderId, long receiverId, long amount, long billId) {
+    public long transfer(long senderId, long receiverId, long amount, long billId, long currentUserId,
+            String currentUserRole) {
         if (billId != -1) {
             String redisKey = "bill:" + billId;
             boolean locked = RedisUtil.lock(redisKey, 300);
@@ -68,17 +69,22 @@ public class TransactionService {
                 throw new InvalidRequestException("Invalid data");
             }
 
-            if ((sender.getBalance() < amount && !sender.getRole().equals("admin"))) {
+            if ((sender.getBalance() < amount && !sender.getRole().equals("ADMIN"))) {
                 conn.rollback();
                 throw new InsufficientBalanceException("Insufficient balance");
             }
 
-            if (!sender.getRole().equals("admin")) {
+            if (!currentUserRole.equals("ADMIN") && currentUserId != senderId) {
+                conn.rollback();
+                throw new InvalidRequestException("Cannot transfer from other user's account");
+            }
+
+            if (!sender.getRole().equals("ADMIN")) {
                 sender.setBalance(sender.getBalance() - amount);
                 accountDAO.updateBalance(senderId, sender.getBalance());
             }
 
-            if (!receiver.getRole().equals("admin")) {
+            if (!receiver.getRole().equals("ADMIN")) {
                 receiver.setBalance(receiver.getBalance() + amount);
                 accountDAO.updateBalance(receiverId, receiver.getBalance());
             }
@@ -122,10 +128,6 @@ public class TransactionService {
                 }
             }
         }
-    }
-
-    public void transfer(long senderId, long receiverId, long amount) {
-        transfer(senderId, receiverId, amount, -1);
     }
 
     public void notifyShop(long billId, boolean success) {
@@ -236,7 +238,6 @@ public class TransactionService {
 
     public static void main(String[] args) {
         TransactionService service = new TransactionService();
-        service.transfer(2, 3, 1500000);
         System.out.println("Transfer successful");
         try {
             AccountDAO accountDAO = new AccountDAO(DBconnnection.getConnection());

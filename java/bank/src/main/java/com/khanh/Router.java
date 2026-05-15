@@ -61,6 +61,9 @@ public class Router {
             }
 
             System.out.println(request);
+            System.out
+                    .println("Parsed Request: method=" + method + ", path=" + path + ", userId=" + userIdStr + ", role="
+                            + userRole);
 
             // Public routes
             if (method.equals("GET") && path.equals("/test"))
