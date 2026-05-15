@@ -49,19 +49,26 @@ public class TransactionController {
         try {
             JSONObject body = req.optJSONObject("body");
             JSONObject query = req.optJSONObject("query");
+            if (query == null) {
+                query = new JSONObject();
+            }
 
-            long userId = query.getLong("userId");
+            long userId = query.optLong("userId", -1);
             long transactionId = query.optLong("transactionId", -1);
             long billId = query.optLong("billId", -1);
             String startDate = query.optString("startDate", null);
             String endDate = query.optString("endDate", null);
+            long currentUserId = req.getLong("userId");
+            String currentUserRole = req.optString("role", "");
 
             List<Transaction> res = new TransactionService().getPersonalTransactionsList(userId, transactionId, billId,
-                    startDate, endDate);
+                    startDate, endDate, currentUserId, currentUserRole);
             JsonObject data = new JsonObject();
             data.add("transactions", new Gson().toJsonTree(res));
 
             return ResponseUtil.response(200, "ok", data);
+        } catch (InvalidRequestException e) {
+            return ResponseUtil.response(422, "INVALID_REQUEST", null);
         } catch (AccountNotFoundException e) {
             return ResponseUtil.response(404, "ACCOUNT_NOT_FOUND", null);
         } catch (Exception e) {

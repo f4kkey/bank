@@ -191,8 +191,18 @@ public class TransactionService {
     }
 
     public List<Transaction> getPersonalTransactionsList(long userId, long transactionId, long billId, String startDate,
-            String endDate) {
+            String endDate, long currentUserId, String currentUserRole) {
+        if (userId == -1) {
+            if (currentUserRole.equals("ADMIN")) {
+                return getTransactionsList();
+            } else {
+                throw new InvalidRequestException("userId is required");
+            }
+        }
         try {
+            if (!currentUserRole.equals("ADMIN") && currentUserId != userId) {
+                throw new InvalidRequestException("Cannot view other user's transactions");
+            }
             Connection conn = DBconnnection.getConnection();
             Account account = new AccountDAO(conn).getById(userId);
             if (account == null) {
@@ -200,6 +210,8 @@ public class TransactionService {
             }
             TransactionDAO transactionDAO = new TransactionDAO(conn);
             return transactionDAO.getPersonalTransactionsList(userId, transactionId, billId, startDate, endDate);
+        } catch (InvalidRequestException e) {
+            throw e;
         } catch (AccountNotFoundException e) {
             throw e;
         } catch (Exception e) {
