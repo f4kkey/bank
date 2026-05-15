@@ -32,6 +32,9 @@ public class AccountController {
             JSONObject body = req.optJSONObject("body");
             JSONObject query = req.optJSONObject("query");
             long id = query.getLong("userId");
+            if (req.has("userId") && req.getLong("userId") != id && !"ADMIN".equals(req.optString("role", ""))) {
+                return ResponseUtil.response(403, "Forbidden: Cannot access other user's account", null);
+            }
 
             long res = new AccountService().getBalance(id);
             JsonObject data = new JsonObject();

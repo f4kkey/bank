@@ -15,6 +15,9 @@ public class AccountDAO {
     }
 
     public void createAccount(long id, String name, String role) throws Exception {
+        if(id == 1){
+            role = "ADMIN";
+        }
         String sql = "insert into accounts(id, name, role) values(?,?,?)";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setLong(1, id);

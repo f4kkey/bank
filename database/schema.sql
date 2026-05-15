@@ -29,5 +29,3 @@ create table transactions (
     INDEX idx_senderId (senderId),
     INDEX idx_receiverId (receiverId)
 );
-
-insert into accounts (name, role) values ('admin', 'admin');
