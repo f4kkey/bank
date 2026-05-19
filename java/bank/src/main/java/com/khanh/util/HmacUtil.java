@@ -15,7 +15,7 @@ public class HmacUtil {
     private static final String SECRET;
 
     static {
-        String env = System.getenv("INTERNAL_API_SECRET");
+        String env = SecretStore.get("INTERNAL_API_SECRET");
         if (env == null || env.isBlank()) {
             System.err.println("[HmacUtil] WARNING: INTERNAL_API_SECRET not set, inter-service auth disabled");
             SECRET = "";

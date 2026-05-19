@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.time.Duration;
 import java.util.List;
 
+import com.google.gson.JsonObject;
 import com.khanh.dao.AccountDAO;
 import com.khanh.dao.TransactionDAO;
 import com.khanh.exception.AccountNotFoundException;
@@ -21,8 +22,7 @@ import com.khanh.util.DBconnnection;
 import com.khanh.util.HmacUtil;
 import com.khanh.util.RedisUtil;
 import com.khanh.model.*;
-// import com.khanh.util.SecretStore;
-import io.github.cdimascio.dotenv.Dotenv;
+import com.khanh.util.SecretStore;
 
 public class TransactionService {
     public long transfer(long senderId, long receiverId, long amount, long billId, long currentUserId,
@@ -113,8 +113,7 @@ public class TransactionService {
         }
     }
     public void notifyShop(long billId, boolean success) {
-        // String shopUrl = SecretStore.get("server_shop_url");
-        String shopUrl = System.getenv("SERVER_SHOP_URL");
+        String shopUrl = SecretStore.get("server_shop_url");
         String url = shopUrl + "/bill/" + billId + "/payment-result";
 
         String jsonBody = "{\"billId\":" + billId + ",\"success\":" + success + "}";
@@ -200,22 +199,24 @@ public class TransactionService {
         }
     }
 
-    public String getTransactionDetail(long billId) {
+    public String getTransactionDetail(long billId, long currentUserId, String currentUserRole) {
         try {
             HttpClient client = HttpClient.newHttpClient();
-            // String url = SecretStore.get("server_shop_url") + "/orders/" + billId;
-            String url = System.getenv("SERVER_SHOP_URL") + "/orders/" + billId;
+            String url = SecretStore.get("server_shop_url") + "/orders/" + billId;
             // Sign the request with HMAC for inter-service authentication
+            JsonObject body = new JsonObject();
             String timestamp = String.valueOf(System.currentTimeMillis());
-            String signature = HmacUtil.sign(timestamp, "");
-
+            String signature = HmacUtil.sign(timestamp, body.toString());
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
                     .header("Accept", "application/json")
                     .header("X-Internal-Signature", signature)
                     .header("X-Internal-Timestamp", timestamp)
+                    .header("X-User-Id", String.valueOf(currentUserId))
                     .build();
+            System.out.println("Fetching transaction detail for billId=" + billId + " with userId=" + currentUserId
+                    + " and role=" + currentUserRole);
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
                 return response.body(); // JSON string
@@ -224,6 +225,7 @@ public class TransactionService {
         } catch (ConnectException e) {
             throw new ConnectErrorException("Cannot connect to shop server");
         } catch (Exception e) {
+            e.printStackTrace();
             throw new InternalServerErrorException(null);
         }
     }

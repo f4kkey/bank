@@ -12,7 +12,7 @@ import org.json.JSONObject;
 public class VaultClient {
 
     private static final String VAULT_ADDR = System.getenv("VAULT_ADDR") != null ? System.getenv("VAULT_ADDR")
-            : "http://vault:8200";
+            : "http://bank-vault:8200";
 
     private static final String VAULT_TOKEN = System.getenv("VAULT_TOKEN") != null ? System.getenv("VAULT_TOKEN")
             : "root";

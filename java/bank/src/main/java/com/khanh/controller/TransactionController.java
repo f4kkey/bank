@@ -61,6 +61,9 @@ public class TransactionController {
             long currentUserId = req.getLong("userId");
             String currentUserRole = req.optString("role", "");
 
+            System.out.println(
+                    "Fetching transactions for userId=" + userId + ", transactionId=" + transactionId + ", billId="
+                            + billId + ", startDate=" + startDate + ", endDate=" + endDate);
             List<Transaction> res = new TransactionService().getPersonalTransactionsList(userId, transactionId, billId,
                     startDate, endDate, currentUserId, currentUserRole);
             JsonObject data = new JsonObject();
@@ -82,12 +85,14 @@ public class TransactionController {
             JSONObject body = req.optJSONObject("body");
             JSONObject query = req.optJSONObject("query");
             long billId = query.optLong("billId", -1);
+            long currentUserId = req.getLong("userId");
+            String currentUserRole = req.optString("role", "");
 
             if (billId == -1) {
                 return new JSONObject().put("status", "ERROR").put("message", "bill id must exists")
                         .toString();
             }
-            String res = new TransactionService().getTransactionDetail(billId);
+            String res = new TransactionService().getTransactionDetail(billId, currentUserId, currentUserRole);
             JsonObject data = new JsonObject();
             JsonObject detailObj = new Gson().fromJson(res, JsonObject.class);
             data.add("detail", detailObj);
