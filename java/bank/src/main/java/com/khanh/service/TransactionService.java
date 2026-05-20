@@ -26,7 +26,7 @@ import com.khanh.util.SecretStore;
 
 public class TransactionService {
     public long transfer(long senderId, long receiverId, long amount, long billId, long currentUserId,
-                         String currentUserRole) {
+            String currentUserRole) {
         if (billId != -1) {
             String redisKey = "bill:" + billId;
             boolean locked = RedisUtil.lock(redisKey, 300);
@@ -112,6 +112,7 @@ public class TransactionService {
             throw new InternalServerErrorException("Internal server error");
         }
     }
+
     public void notifyShop(long billId, boolean success) {
         String shopUrl = SecretStore.get("server_shop_url");
         String url = shopUrl + "/bill/" + billId + "/payment-result";
@@ -161,7 +162,7 @@ public class TransactionService {
     }
 
     public List<Transaction> getTransactionsList() {
-        try (Connection conn = DBconnnection.getConnection();){
+        try (Connection conn = DBconnnection.getConnection();) {
             TransactionDAO transactionDAO = new TransactionDAO(conn);
             return transactionDAO.getTransactionsList();
         } catch (Exception e) {
@@ -179,7 +180,7 @@ public class TransactionService {
                 throw new InvalidRequestException("userId is required");
             }
         }
-        try (Connection conn = DBconnnection.getConnection();){
+        try (Connection conn = DBconnnection.getConnection();) {
             if (!currentUserRole.equals("ADMIN") && currentUserId != userId) {
                 throw new InvalidRequestException("Cannot view other user's transactions");
             }
@@ -204,9 +205,9 @@ public class TransactionService {
             HttpClient client = HttpClient.newHttpClient();
             String url = SecretStore.get("server_shop_url") + "/orders/" + billId;
             // Sign the request with HMAC for inter-service authentication
-            JsonObject body = new JsonObject();
+            // JsonObject body = new JsonObject();
             String timestamp = String.valueOf(System.currentTimeMillis());
-            String signature = HmacUtil.sign(timestamp, body.toString());
+            String signature = HmacUtil.sign(timestamp, "");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .GET()
@@ -214,6 +215,7 @@ public class TransactionService {
                     .header("X-Internal-Signature", signature)
                     .header("X-Internal-Timestamp", timestamp)
                     .header("X-User-Id", String.valueOf(currentUserId))
+                    .header("X-User-Role", currentUserRole)
                     .build();
             System.out.println("Fetching transaction detail for billId=" + billId + " with userId=" + currentUserId
                     + " and role=" + currentUserRole);
