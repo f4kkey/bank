@@ -71,6 +71,8 @@ services:
       MARIADB_DATABASE: bank
       MARIADB_USER: user
       MARIADB_PASSWORD: 1
+    ports:
+      - 33063:3306
     volumes:
       - bank_db_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
