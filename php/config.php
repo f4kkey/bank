@@ -4,7 +4,7 @@ define('JAVA_HOST', getenv('JAVA_HOST') ?: '127.0.0.1');
 define('JAVA_PORT', 12345);
 
 $redis = new Redis();
-$redis->connect(getenv('REDIS_HOST') ?: '127.0.0.1', 6379); 
+$redis->connect(getenv('REDIS_HOST') ?: '127.0.0.1', 6379);
 
 function rate_limit($redis, $limit = 100, $window = 60)
 {
@@ -30,13 +30,24 @@ function call_java($data)
 
     if (!$socket) {
         return json_encode([
+            "code" => 502,
             "status" => "ERROR",
             "message" => "cannot connect to java bank server"
         ]);
     }
+    // stream_set_timeout($socket, 15);
     fwrite($socket, json_encode($data) . "\n");
     $response = fgets($socket);
+    $meta = stream_get_meta_data($socket);
     fclose($socket);
+
+    if ($response === false || !empty($meta['timed_out'])) {
+        return json_encode([
+            "code" => 504,
+            "status" => "ERROR",
+            "message" => "java bank server timed out"
+        ]);
+    }
 
     return $response;
 }

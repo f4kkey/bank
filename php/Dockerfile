@@ -8,6 +8,7 @@ RUN apk add --no-cache $PHPIZE_DEPS \
 
 # Copy application code
 COPY . /var/www/payment
+COPY zz-bank-fpm.conf /usr/local/etc/php-fpm.d/zz-bank-fpm.conf
 
 WORKDIR /var/www/payment
 
